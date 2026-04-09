@@ -5,11 +5,12 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import { PageHeader } from "./component";
+import Availability from "../home/profile/business/availability/main";
 
 // Screen 2: Service Availability
 type Day = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday' | 'Sunday';
 
-export default function Availability() {
+export default function AvailabilityAuthPage() {
     const [selectedDays, setSelectedDays] = useState<Day[]>(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']);
     const [openingTimes, setOpeningTimes] = useState<Record<Day, string>>({
         Monday: '08:00',
@@ -51,50 +52,7 @@ export default function Availability() {
                 currentStep={2}
             />
 
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-                <View className="pt-6">
-                    <PageHeader
-                        title="Set Your Service Availability"
-                        subtitle="Now, let's set your working hours so customers know when they can book your services."
-                    />
-
-                    <View className="px-6">
-                        <DaySelector
-                            days={days}
-                            selectedDays={selectedDays}
-                            onToggleDay={handleToggleDay}
-                        />
-
-                        <View className="mb-6">
-                            <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Opening Time
-                            </Text>
-                            {weekdays.map((day) => (
-                                <TimePicker
-                                    key={`opening-${day}`}
-                                    label={day}
-                                    time={openingTimes[day]}
-                                    onTimeChange={(time) => setOpeningTimes({ ...openingTimes, [day]: time })}
-                                />
-                            ))}
-                        </View>
-
-                        <View className="mb-6">
-                            <Text className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Closing Time
-                            </Text>
-                            {weekdays.map((day) => (
-                                <TimePicker
-                                    key={`closing-${day}`}
-                                    label={day}
-                                    time={closingTimes[day]}
-                                    onTimeChange={(time) => setClosingTimes({ ...closingTimes, [day]: time })}
-                                />
-                            ))}
-                        </View>
-                    </View>
-                </View>
-            </ScrollView>
+            <Availability />
 
             <View className="px-6 pb-6 pt-4">
                 <Button title="Next" onPress={handleNext} />

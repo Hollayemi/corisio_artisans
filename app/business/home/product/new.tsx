@@ -229,7 +229,6 @@ export default function CreateProductScreen() {
                                 onPress={handleImageUpload}
                                 className="border-2 p-12 border-dashed border-gray-300 dark:border-gray-600 rounded-lg items-center justify-center mb-4"
                             >
-
                                 <UploadCloud size={40} className="text-gray-900 dark:!text-white" />
                                 <Text className="text-[15px] mt-3 font-medium text-gray-900 dark:text-white mb-3">
                                     Upload up to 5 images

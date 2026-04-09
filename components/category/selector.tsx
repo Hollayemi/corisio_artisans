@@ -262,6 +262,7 @@ export const CategorySelector = ({
         <View className="!flex-1">
             {/* Trigger Button */}
             <TouchableOpacity
+                activeOpacity={1}
                 onPress={() => setIsModalVisible(true)}
                 className="bg-gray-50 hidden dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-4 mb-4"
             >

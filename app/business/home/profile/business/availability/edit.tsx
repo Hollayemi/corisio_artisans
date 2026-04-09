@@ -49,11 +49,13 @@ export default function Availability() {
                 ...dayData,
                 [timeType]: newTime
             };
-
+            
             // Validate that opening time is before closing time
             if (timeType === 'from' || timeType === 'to') {
                 const fromTime = timeType === 'from' ? newTime : dayData.from;
                 const toTime = timeType === 'to' ? newTime : dayData.to;
+                
+                console.log("======>",fromTime, toTime)
 
                 if (fromTime >= toTime) {
                     Alert.alert(
@@ -87,10 +89,11 @@ export default function Availability() {
             return;
         }
 
+        
         // Validate all selected days have valid times
         for (const dayKey of selectedDays) {
             const day = availability[dayKey as keyof Days];
-            if (day.from >= day.to) {
+            if (parseInt(day.from.split(":")[0]) >= parseInt(day.to.split(":")[0])) {
                 Alert.alert(
                     'Invalid Schedule',
                     `Opening time must be before closing time for ${dayKey}`

@@ -36,9 +36,8 @@ export default function PhoneEntry() {
                     <View className="pt-6">
                         <PageHeader
                             title="What's Your Number?"
-                            subtitle="We'll send a one-time code to verify your store. No spam — promise."
+                            subtitle="We'll send a one-time code to verify your store. No spam."
                         />
-
                         <PhoneNumber pathname="/business/auth/files/PhoneVerify" data={{categories: categories ?? {}}} />
 
                         <View className="mt-6 flex-row justify-center">

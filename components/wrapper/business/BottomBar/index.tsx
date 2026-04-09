@@ -30,7 +30,7 @@ export type activeTabType =
 
 const navItems: NavItem[] = [
     { name: 'Home', icon: Home, path: '/business/home' },
-    { name: 'Catalogue', icon: Package, path: '/business/home/product/list' },
+    { name: 'Catalogue', icon: Package, path: '/business/home/product/asset' },
     { name: 'Orders', icon: ShoppingBag, path: '/business/home/orders/list' },
     { name: 'Inbox', icon: Inbox, path: '/business/chat' },
     { name: 'Profile', icon: User, path: '/business/home/profile' },

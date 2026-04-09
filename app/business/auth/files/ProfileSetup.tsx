@@ -268,7 +268,7 @@ function SubScreenCard({
             className="flex-row items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-4 mb-3"
         >
             <View className="w-10 h-10 rounded-full bg-[#2A347E]/10 dark:bg-[#FDB415]/10 items-center justify-center mr-4">
-                <Ionicons name={icon} size={20} color="#2A347E" />
+                <Ionicons name={icon} size={20} color="gray" />
             </View>
             <View className="flex-1">
                 <Text className="text-[15px] font-semibold text-gray-900 dark:text-white">
@@ -347,7 +347,7 @@ export default function ProfileSetup() {
             // updateStoreData is dispatched automatically in authSlice onQueryStarted
             console.log({payload})
             await registerStore(payload).then(res => {
-                router.replace("/business/home");
+                router.replace("/business/auth/StoreImages");
             });
 
         } catch (err: any) {
@@ -480,12 +480,12 @@ export default function ProfileSetup() {
                                         subtitle="+15 points"
                                         onPress={() => router.push("/business/auth/ProfilePicture")}
                                     />
-                                    <SubScreenCard
+                                    {/* <SubScreenCard
                                         icon="time"
                                         title="Set Opening Hours"
                                         subtitle="+10 points"
                                         onPress={() => router.push("/business/auth/Availability")}
-                                    />
+                                    /> */}
 
                                     {/* ── API-level error ── */}
                                     {apiError ? (

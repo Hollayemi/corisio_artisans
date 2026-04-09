@@ -16,6 +16,7 @@ export default function TabLayout() {
             <Stack.Screen name="Signup2" options={{ headerShown: false }} />
             <Stack.Screen name="Signup3" options={{ headerShown: false }} />
             <Stack.Screen name="Availability" options={{ headerShown: false }} />
+            <Stack.Screen name="StoreImages" options={{ headerShown: false }} />
             <Stack.Screen name="ProfilePicture" options={{ headerShown: false }} />
             <Stack.Screen name="Category" options={{ headerShown: false }} />
             {/* other pages */}

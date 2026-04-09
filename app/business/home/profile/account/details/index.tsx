@@ -56,6 +56,7 @@ const PersonalInformationScreen: React.FC = () => {
         phoneNumber: phoneNumber || '',
         email: email || '',
     });
+
     const [isEditing, setIsEditing] = useState(false);
     const handleSave = () => {
         updateUserDetails(personalInfo).then(() => refetchStore())

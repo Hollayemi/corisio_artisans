@@ -46,6 +46,7 @@ export function DaySelector({ availability, onToggleDay }: DaySelectorProps) {
             <View className="flex-row flex-wrap gap-2">
                 {days.map((day) => (
                     <TouchableOpacity
+                        activeOpacity={1}
                         key={day.key}
                         onPress={() => onToggleDay(day.key)}
                         className={`px-4 py-2 rounded-full border ${availability[day.key]?.isset
@@ -134,6 +135,7 @@ export function TimePicker({ label, time, onTimeChange, disabled = false }: Time
             </Text>
             <View className="flex-row items-center">
                 <TouchableOpacity
+                 activeOpacity={1}
                     className="p-2"
                     onPress={incrementTime}
                     disabled={disabled}
@@ -147,6 +149,7 @@ export function TimePicker({ label, time, onTimeChange, disabled = false }: Time
                     {formatDisplayTime(time)}
                 </Text>
                 <TouchableOpacity
+                 activeOpacity={1}
                     className="p-2"
                     onPress={decrementTime}
                     disabled={disabled}

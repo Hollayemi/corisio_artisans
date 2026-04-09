@@ -21,6 +21,7 @@ export const CategoryItem = ({
         <View className="mb-2">
             <View className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                 <TouchableOpacity
+                    activeOpacity={1}
                     className="flex-row items-center p-4"
                     onPress={onExpand}
                 >
@@ -29,7 +30,6 @@ export const CategoryItem = ({
                         indeterminate={isIndeterminate}
                         onPress={onToggle}
                     />
-
                     <Text className="flex-1 text-base font-semibold text-gray-900 dark:text-white">
                         {category.category}
                     </Text>

@@ -48,7 +48,7 @@ const CONDITION_LABELS: Record<string, string> = {
     refurbished: "Refurb",
 };
 
-export default function ProductPage() {
+export default function ProductListingPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     const { data, isLoading, refetch } = useGetStoreProductsQuery({});

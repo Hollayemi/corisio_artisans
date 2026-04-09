@@ -30,6 +30,7 @@ export const SubCategoryItem = ({
     return (
         <View className="border-l-4 border-blue-200 dark:border-blue-800 ml-4">
             <TouchableOpacity
+                activeOpacity={0.8}
                 className="flex-row items-center p-3 bg-gray-50 dark:bg-gray-900"
                 onPress={() => setIsExpanded(!isExpanded)}
             >
@@ -40,7 +41,7 @@ export const SubCategoryItem = ({
                     size="small"
                 />
 
-                <Text className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200">
+                <Text className="flex-1 text-base font-medium text-gray-800 dark:text-gray-200">
                     {subcategory.label}
                 </Text>
 
@@ -64,6 +65,7 @@ export const SubCategoryItem = ({
                     {subcategory.groups?.map((group: any) => (
                         <TouchableOpacity
                             key={group._id}
+                            activeOpacity={1}
                             className="flex-row items-center p-3 pl-8 ml-5 border-l-4 border-gray-200 dark:border-gray-700"
                             onPress={() => onToggleGroup(categoryId, subcategory._id, group._id)}
                         >
@@ -72,8 +74,7 @@ export const SubCategoryItem = ({
                                 onPress={() => onToggleGroup(categoryId, subcategory._id, group._id)}
                                 size="small"
                             />
-
-                            <Text className="text-sm text-gray-700 dark:text-gray-300">
+                            <Text className="text-base text-gray-700 dark:text-gray-300">
                                 {group.label}
                             </Text>
                         </TouchableOpacity>
