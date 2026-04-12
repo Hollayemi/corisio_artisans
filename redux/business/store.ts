@@ -1,3 +1,4 @@
+// redux/business/store.ts  (updated — adds jobs feature)
 import { configureStore } from "@reduxjs/toolkit";
 
 import authReducer, { authApi } from "./slices/authSlices";
@@ -5,6 +6,7 @@ import { branchApi } from './slices/branchSlice';
 import { campaignsDashboardApi } from './slices/campaignSlice';
 import { chatApi } from './slices/chatSlice';
 import { growthApi } from './slices/growthSlice';
+import { appliedJobsReducer, jobsApi } from './slices/jobsSlice';   // ← new
 import { ordersCustomersApi } from './slices/orderSlice';
 import { productApi } from "./slices/productSlice";
 import { referralApi } from "./slices/referralSlice";
@@ -16,6 +18,7 @@ import { paymentApi } from "./slices/transaction";
 export const store = configureStore({
     reducer: {
         auth: authReducer,
+        appliedJobs: appliedJobsReducer,                             // ← new
         [authApi.reducerPath]: authApi.reducer,
         [staffApi.reducerPath]: staffApi.reducer,
         [productApi.reducerPath]: productApi.reducer,
@@ -28,6 +31,7 @@ export const store = configureStore({
         [referralApi.reducerPath]: referralApi.reducer,
         [ordersCustomersApi.reducerPath]: ordersCustomersApi.reducer,
         [campaignsDashboardApi.reducerPath]: campaignsDashboardApi.reducer,
+        [jobsApi.reducerPath]: jobsApi.reducer,                      // ← new
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
@@ -43,6 +47,7 @@ export const store = configureStore({
             .concat(referralApi.middleware)
             .concat(ordersCustomersApi.middleware)
             .concat(campaignsDashboardApi.middleware)
+            .concat(jobsApi.middleware),                             // ← new
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -146,7 +146,7 @@ const OnboardingScreen: React.FC = () => {
                     <TouchableOpacity
                         className="w-full py-4 rounded-full"
                         style={{ backgroundColor: "#2C337C" }}
-                        onPress={() => router.push("/user/home")}
+                        onPress={() => router.push("/home")}
                         activeOpacity={0.8}
                     >
                         <Text

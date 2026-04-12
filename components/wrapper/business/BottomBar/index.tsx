@@ -1,5 +1,6 @@
 import { router, usePathname } from 'expo-router';
 import {
+    Briefcase,
     Home,
     Inbox,
     Package,
@@ -26,13 +27,15 @@ export type activeTabType =
     | "Catalogue"
     | "Orders"
     | "Inbox"
-    | "Profile";
+    | "Profile"
+    | "Jobs";
 
 const navItems: NavItem[] = [
     { name: 'Home', icon: Home, path: '/business/home' },
     { name: 'Catalogue', icon: Package, path: '/business/home/product/asset' },
-    { name: 'Orders', icon: ShoppingBag, path: '/business/home/orders/list' },
-    { name: 'Inbox', icon: Inbox, path: '/business/chat' },
+    // { name: 'Orders', icon: ShoppingBag, path: '/business/home/orders/list' },
+    { name: 'Jobs', icon: Briefcase, path: '/business/home/jobs' },
+    // { name: 'Inbox', icon: Inbox, path: '/business/chat' },
     { name: 'Profile', icon: User, path: '/business/home/profile' },
 ];
 

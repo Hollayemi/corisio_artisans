@@ -138,7 +138,7 @@ function RootLayout() {
                 />
                 {/* <ChatDataProvider> */}
                     <Stack>
-                        <Stack.Screen name="union" options={{ headerShown: false }} />
+                        <Stack.Screen name="home" options={{ headerShown: false }} />
                         <Stack.Screen name="(welcome)" options={{ headerShown: false }} />
                         <Stack.Screen name="user" options={{ headerShown: false }} />
                         <Stack.Screen name="business" options={{ headerShown: false }} />
