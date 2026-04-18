@@ -1,5 +1,5 @@
 import toaster from "@/config/toaster";
-import { useUpdateProfilePictureMutation } from "@/redux/user/slices/userSlice2";
+import { useUpdateProfilePictureMutation } from "@/redux/user/slices/userSlice";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import { useUserData } from "./useData";

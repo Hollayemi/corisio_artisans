@@ -67,14 +67,14 @@ const navigateToErrorPage = async (errorType: ErrorType) => {
         break;
         case ErrorType.SERVER_ERROR:
             router.push({
-                pathname: "/business/auth/Login",
-                params: { errorType: "server" },
+                pathname: "/auth/Login",
+                params: { errorType: "server", from: "business" },
             });
             break;
         case ErrorType.AUTH_ERROR:
             // Clear auth data and
             await AsyncStorage.multiRemove(["store_token", "refresh_token"]);
-            router.push("/business/auth/Login");
+            router.push({pathname:"/auth/Login", params: { errorType: "auth", from: "business" }});
             break;
 
         default:
@@ -82,7 +82,6 @@ const navigateToErrorPage = async (errorType: ErrorType) => {
     }
 };
 
-// Check network connectivity
 const checkNetworkConnectivity = async (): Promise<boolean> => {
     try {
         const netInfo = await NetInfo.fetch();

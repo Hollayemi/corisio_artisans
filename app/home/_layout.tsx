@@ -1,10 +1,15 @@
+import { UserDataProvider } from "@/context/userContext";
+import { store } from "@/redux/user/store";
 import { Stack } from "expo-router";
+import { Provider } from "react-redux";
 
 export default function TabLayout() {
     return (
-        <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            {/* <Stack.Screen
+        <Provider store={store}>
+            <UserDataProvider>
+                <Stack>
+                    <Stack.Screen name="index" options={{ headerShown: false }} />
+                    {/* <Stack.Screen
                 name="food/category"
                 options={{ headerShown: false }}
             />
@@ -25,10 +30,12 @@ export default function TabLayout() {
                 name="food/deliveryMap"
                 options={{ headerShown: false }}
             /> */}
-            <Stack.Screen
-                name="others/service"
-                options={{ headerShown: false }}
-            />
-        </Stack>
+                    <Stack.Screen
+                        name="others/service"
+                        options={{ headerShown: false }}
+                    />
+                </Stack>
+            </UserDataProvider>
+        </Provider>
     );
 }

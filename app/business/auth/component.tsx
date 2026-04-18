@@ -1,10 +1,8 @@
 import Button from "@/components/form/Button";
-import { useSendOtpMutation } from "@/redux/business/slices/authSlice";
+import { useSendOtpMutation } from "@/redux/authService/authSlice";
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import { Image, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
-
-// Page Title and Subtitle Component
 import { normalisePhone } from '@/utils/format';
 import { Route, router } from 'expo-router';
 import { Text } from 'react-native';
@@ -51,7 +49,6 @@ export function PageHeader({ title, subtitle, hasImage }: PageHeaderProps) {
 
 // Profile Picture Upload Component
 export const ProfilePictureUpload = ({ handleUpload, localFiles = [], image, isUploading }: any) => {
-    console.log("localFiles=>>>>>>>", localFiles[localFiles.length - 1])
     return (
         <View className="items-center mb-8">
             <View className="relative">
@@ -132,9 +129,12 @@ export const ProfileGuidelines = () => {
 
 
 
-
-export const PhoneNumber = ({pathname, data}:{pathname: Route, data?:any}) => {
-    const { categories, ...passData } = data ? data : {};
+interface PhoneNumberDataProps {
+    from: "user" | "business";
+    categories?: any
+}
+export const PhoneNumber = ({ pathname, data }: { pathname: Route, data?: any }) => {
+    const { categories, ...passData }:PhoneNumberDataProps  = data ? data : {};
     const [phone, setPhone] = useState(""); // raw digit string, e.g. "08012345678"
     const [error, setError] = useState("");
     const inputRef = useRef<TextInput>(null);
@@ -146,9 +146,7 @@ export const PhoneNumber = ({pathname, data}:{pathname: Route, data?:any}) => {
         if (d.length <= 7) return `${d.slice(0, 4)} ${d.slice(4)}`;
         return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}`;
     };
-    
 
-    // ── RTK Query ───────────────────────────────────────────────────────────
     const [sendOtp, { isLoading }] = useSendOtpMutation();
 
     const validate = (): boolean => {
@@ -162,24 +160,20 @@ export const PhoneNumber = ({pathname, data}:{pathname: Route, data?:any}) => {
 
     const handleSendOtp = async () => {
         if (!validate()) return;
-
         const phoneNumber = normalisePhone(phone);
 
         try {
-            // category: JSON.parse(categories || "{}")
-            // POST /stores/auth/send-otp → { phoneNumber }
-            // Response: { success, data: { phoneNumber, message, otp? } }
-            await sendOtp({ phoneNumber, category: JSON.parse(categories || "{}") }).then((res) => {
-                console.log({res});
+            await sendOtp({ phoneNumber, from: passData.from, category: categories}).then((res) => {
+                console.log({ res });
                 router.push({
-                    pathname: (pathname || "/business/auth/files/PhoneVerify") as any,
-                    params: { phone: phoneNumber, ...passData },
+                    pathname: (pathname || "/auth/PhoneVerify") as any,
+                    params: { phone: phoneNumber, ...passData, from: passData.from },
                 });
             })
             setError("");
 
         } catch (err: any) {
-            console.log("Error sending OTP:", err);
+            console.log("Error sending OTP:", err, err?.data?.message);
             const status = err?.status;
             if (status === 429) {
                 setError("You've requested too many OTPs. Try again in 10 minutes.");
@@ -245,7 +239,6 @@ export const PhoneNumber = ({pathname, data}:{pathname: Route, data?:any}) => {
                     disabled={phone.replace(/\D/g, "").length < 10 || isLoading}
                 />
             </View>
-
         </View>
     )
 }

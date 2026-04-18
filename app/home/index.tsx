@@ -17,14 +17,18 @@ import Search from "./search";
 import themeConfig, { services } from "@/config/themeConfig";
 import { useUserData } from "@/hooks/useData";
 import HomeWrapper from "@/components/wrapper";
+import { useGetFeaturedCategoriesQuery } from "@/redux/business/slices/growthSlice";
 
 export default function Landing() {
     const [filter, setFilter] = useState("All");
     const [search, setSearch] = useState(false);
     const { userInfo } = useUserData() as any;
+    // const { data: cates, isLoading, refetch } = useGetFeaturedCategoriesQuery(false);
+    // const categoryTree = cates ? cates?.data : [];
+    // console.log("categoryTree", categoryTree);
     return (
         <HomeWrapper className="relative" page="home">
-            <View className="">
+            <ThemedView className="">
                 <View className="px-2 h-64 !relative w-[100%] ml !bg-['#181818'] rounded-b-[20%] overflow-hidden">
                     <HomePattern />
                     <View className="flex flex-row justify-between z-50  w-full items-center mt-16">
@@ -65,7 +69,6 @@ export default function Landing() {
                     itemsPerView={1.1}
                     interval={7000}
                     className="!-mt-32 !-mb-2"
-                    // dots
                 >
                     <Image
                         source={require("@/assets/images/productOff.png")}
@@ -80,8 +83,8 @@ export default function Landing() {
                         className="!w-full h-36 rounded-xl px-2"
                     />
                 </Slider>
-            </View>
-            <ScrollView className=" z-0 !relative">
+            </ThemedView>
+            <ScrollView className=" dark:bg-gray-900 z-0 !relative">
                 <ThemedView className="px-3">
                     <LookingForFood />
                     <ThemedView className="flex flex-row items-center my-4">
@@ -124,7 +127,7 @@ export default function Landing() {
                     </ThemedView>
                     <ThemedView>
                         {Object.values(services).map((each: any, i: any) => (
-                            <Service image={each} key={i} />
+                            <Service image={each} i={i} key={i} />
                         ))}
                     </ThemedView>
                 </ThemedView>

@@ -216,7 +216,7 @@ const authSlice = createSlice({
             AsyncStorage.multiRemove(['store_token', 'store_data']);
 
             // Navigate to login
-            router.push('/business/auth/Login');
+            router.push('/auth/Login');
         },
 
         clearError: (state) => {

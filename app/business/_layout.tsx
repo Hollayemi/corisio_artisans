@@ -26,8 +26,6 @@ export default function BusinessLayout() {
                         <Stack.Screen name="home" options={{ headerShown: false }} />
                         <Stack.Screen name="chat" options={{ headerShown: false }} />
                         <Stack.Screen name="auth" options={{ headerShown: false }} />
-                        <Stack.Screen name="broken" options={{ headerShown: false }} />
-                        <Stack.Screen name="+not-found" />
                     </Stack>
                 </StoreDataProvider>
             </Provider>

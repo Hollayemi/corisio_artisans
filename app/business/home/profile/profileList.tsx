@@ -18,14 +18,14 @@ export const accountSettingsItems: ProfileItem[] = [
 
 
 export const businessPerformanceItems: ProfileItem[] = [
-    { id: 1, name: "Business Information", type: "link", to: "/business/home/profile/business/details" },
-    { id: 1, name: "Business Availability", type: "link", to: "/business/home/profile/business/availability" },
-    { id: 1, name: "Store Location", type: "link", to: "/business/auth/map", parameters: { from: "/business/home/profile", type: "redirect" } },
-    // { id: 2, name: "Insight & Performance", type: "link", to: "/business/home/profile/business/insights" },
-    // { id: 3, name: "Ratings & Reviews", type: "link", to: "/business/home/profile/business/reviews" },
+    { id: 4, name: "Business Information", type: "link", to: "/business/home/profile/business/details" },
+    { id: 5, name: "Business Availability", type: "link", to: "/business/home/profile/business/availability" },
+    { id: 6, name: "Store Location", type: "link", to: "/business/auth/map", parameters: { from: "/business/home/profile", type: "redirect" } },
+    // { id: 7, name: "Insight & Performance", type: "link", to: "/business/home/profile/business/insights" },
+    // { id: 8, name: "Ratings & Reviews", type: "link", to: "/business/home/profile/business/reviews" },
 ];
 
 export const supportItems: ProfileItem[] = [
-    { id: 1, name: "Help & Support", type: "link", to: "/business/home/profile/support/help" },
-    { id: 2, name: "Visit Our Website", type: "link", to: "/business/home/profile/support/website" },
+    { id: 9, name: "Help & Support", type: "link", to: "/business/home/profile/support/help" },
+    { id: 10, name: "Visit Our Website", type: "link", to: "/business/home/profile/support/website" },
 ];

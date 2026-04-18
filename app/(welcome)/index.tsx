@@ -139,7 +139,7 @@ const OnboardingScreen: React.FC = () => {
                         activeOpacity={0.8}
                     >
                         <Text className="text-white text-center text-lg font-semibold">
-                            Continue As Store Owner
+                            Continue As A Business Owner
                         </Text>
                     </TouchableOpacity>
 
@@ -153,7 +153,7 @@ const OnboardingScreen: React.FC = () => {
                             className="text-center text-lg font-semibold"
                             style={{ color: "white" }}
                         >
-                            Continue As Buyer
+                            Continue As A User
                         </Text>
                     </TouchableOpacity>
                 </View>

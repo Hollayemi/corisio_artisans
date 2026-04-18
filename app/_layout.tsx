@@ -9,7 +9,7 @@ import 'react-native-reanimated';
 // Import global CSS file
 import "../global.css";
 
-// import { ChatDataProvider } from '@/context/chatContext';
+import { ChatDataProvider } from '@/context/chatContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -17,6 +17,9 @@ import * as Location from 'expo-location';
 import { Image } from 'react-native';
 import ToastContainer from "toastify-react-native";
 import { server } from '@/config/server';
+import { Provider } from 'react-redux';
+import { store } from '@/redux/store';
+import { AuthDataProvider } from '@/context/authContext';
 
 // Prevent the splash screen from auto-hiding before Asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -121,6 +124,7 @@ function RootLayout() {
 
 
     return (
+        <Provider store={store}>
         <View className="flex-1" onLayout={onLayoutRootView}>
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <ToastContainer
@@ -136,8 +140,9 @@ function RootLayout() {
                         padding: 0,
                     }}
                 />
-                {/* <ChatDataProvider> */}
+                <AuthDataProvider>
                     <Stack>
+                        <Stack.Screen name="auth" options={{ headerShown: false }} />
                         <Stack.Screen name="home" options={{ headerShown: false }} />
                         <Stack.Screen name="(welcome)" options={{ headerShown: false }} />
                         <Stack.Screen name="user" options={{ headerShown: false }} />
@@ -146,9 +151,10 @@ function RootLayout() {
                         <Stack.Screen name="+not-found" />
                     </Stack>
                     <StatusBar style="auto" />
-                {/* </ChatDataProvider> */}
+                </AuthDataProvider>
             </ThemeProvider>
         </View>
+        </Provider>
     );
 }
 

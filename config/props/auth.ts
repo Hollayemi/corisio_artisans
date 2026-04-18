@@ -54,13 +54,10 @@ export interface ChangeEmailData {
 export interface User {
     id: string;
     fullname: string;
-    email: string;
+    email?: string;
     username?: string;
     phoneNumber?: string;
     state?: string;
-    isSeller?: boolean;
-    store?: string;
-    branch?: string;
     avatar?: any;
     isVerified?: boolean;
     twoFactorEnabled?: boolean;

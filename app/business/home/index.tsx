@@ -9,6 +9,7 @@ import { useGetMyReferralsQuery, useGetReferralStatsQuery } from '@/redux/busine
 import { formatPrice } from '@/utils/format';
 import { router } from 'expo-router';
 import {
+    Bell,
     ChevronDown,
     CircleCheck,
     CircleDashed,
@@ -299,8 +300,9 @@ const ProfileCompletionTab = () => {
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 const Homepage = () => {
-    const tabs = ['Overview', 'Profile', 'Referrals'] as const;
-    type TabKey = typeof tabs[number];
+    const tabs = ['Overview', 'Profile'] as const;
+    const allTabs = ['Overview', 'Profile', 'Referrals'] as const;
+    type TabKey = typeof allTabs[number];
 
     const [activeTab, setActiveTab] = useState<TabKey>('Overview');
     const [shareReferral, setShare] = useState<boolean>(false);
@@ -406,7 +408,7 @@ const Homepage = () => {
                         onPress={() => router.push('/business/chat')}
                         className="w-12 h-12 border border-2-gray-900 dark:border-gray-100 rounded-full items-center justify-center"
                     >
-                        <Inbox size={25} color={iconDarkColor} />
+                        <Bell size={25} color={iconDarkColor} />
                         <View className="absolute top-1 right-0 bg-red-500 rounded-full min-w-5 h-5 items-center justify-center">
                             <Text className="text-white text-xs font-medium">3</Text>
                         </View>
@@ -460,15 +462,12 @@ const Homepage = () => {
 
                     {activeTab === 'Referrals' && (
                         <View className="px-4 mb-3 mt-2 w-full">
-                            {/* Title row */}
                             <View className="flex-row items-center justify-between mb-3">
                                 <Text className="text-lg font-semibold text-black dark:text-white">
                                     Referrals
                                 </Text>
                                 <ShareReferral setShare={setShare} />
                             </View>
-
-                            {/* Live summary strip — visible as soon as the query resolves */}
                             {refSummary && (
                                 <View className="flex-row gap-2 flex-wrap">
                                     {summaryPills.map(({ key, label, bg, text }) => (
@@ -479,8 +478,6 @@ const Homepage = () => {
                                             <Text className={`text-sm ${text}`}>{label}</Text>
                                         </View>
                                     ))}
-
-                                    {/* Boost level pill — only when store has an active tier */}
                                     {refStats?.boost?.level && refStats.boost.level !== 'none' && (
                                         <View className="flex-row items-center px-3 py-1.5 rounded-full bg-yellow-100 dark:bg-yellow-900/30">
                                             <Zap size={12} color="#ca8a04" />

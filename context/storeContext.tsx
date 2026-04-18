@@ -121,7 +121,6 @@ const StoreDataProvider: React.FC<StoreDataProviderProps> = ({ children }) => {
                     refetchStore,
                     refetchReferral,
                     showOverlay,
-
                     referralLoading,
                     storeIsLoading,
                 }}

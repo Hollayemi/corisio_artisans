@@ -1,8 +1,7 @@
-// screens/ProfileHomeScreen.tsx
 import ModalComponent from '@/components/modal';
 import StoreWrapper from '@/components/wrapper/business';
 import { useStoreData } from '@/hooks/useData';
-import { logoutUser } from '@/redux/business/slices/authSlices';
+import { logoutUser } from '@/redux/authService/authSlice';
 import { router } from 'expo-router';
 import { ChevronRightIcon } from 'lucide-react-native';
 import React, { useState } from 'react';

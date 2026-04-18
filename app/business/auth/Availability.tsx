@@ -43,7 +43,7 @@ export default function AvailabilityAuthPage() {
     };
 
     const handleNext = () => {
-        router.push('/business/auth/Availability')
+        router.push('/business/home')
     };
 
     return (
@@ -55,7 +55,7 @@ export default function AvailabilityAuthPage() {
             <Availability />
 
             <View className="px-6 pb-6 pt-4">
-                <Button title="Next" onPress={handleNext} />
+                <Button title="Dashboard" onPress={handleNext} />
             </View>
         </SafeAreaView>
     );

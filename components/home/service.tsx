@@ -1,47 +1,157 @@
-import { Image, ScrollView, Text, View } from "react-native";
-import { ThemedView } from "../ThemedView";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { IconSymbol } from "../ui/IconSymbol";
 import { ThemedText } from "../ThemedText";
 import { Link } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-// import { Comments } from "./restaurant";
 import { services } from "@/config/themeConfig";
 
-export default function Service({ image }: any) {
-    return (
-        <ThemedView className="mb-8">
-            <View className="w-full h-32 rounded-3xl overflow-hidden relative">
-                <Image source={image} className="h-full w-full " />
-                <ThemedView className="w-12 h-12 !bg-white rounded-full absolute bottom-5 right-5 flex justify-center items-center">
-                    <IconSymbol name="heart.fill" color="orange" />
-                </ThemedView>
-            </View>
-            <View className="p-2">
-                <Link href="/user">
-                    <ThemedText
-                        numberOfLines={1}
-                        className="!font-bold !text-2xl"
-                    >
-                        Chicken Double Sausage Sharwama
-                    </ThemedText>
-                </Link>
-                <Text numberOfLines={1} className="!text-lg !text-gray-400">
-                    Open (8am), Closes (7pm) Mon - Sat
-                </Text>
+export const mechanicsData = [
+    {
+        id: 1,
+        name: "AutoCare Pro Workshop",
+        mechanicName: "John Smith",
+        specialty: "Engine & Transmission",
+        experience: "8 years",
+        rating: 4.8,
+        price: "₦15,000",
+        openTime: "8am",
+        closeTime: "8pm",
+        daysOpen: "Mon - Sat",
+        location: "Ikeja, Lagos",
+        phone: "+234 801 234 5678",
+        distance: "1.2 km away",
+        available: true,
+    },
+    {
+        id: 2,
+        name: "QuickFix Auto Solutions",
+        mechanicName: "Michael Okafor",
+        specialty: "Electrical & AC Repair",
+        experience: "5 years",
+        rating: 4.5,
+        price: "₦12,000",
+        openTime: "7am",
+        closeTime: "9pm",
+        daysOpen: "Mon - Sun",
+        location: "Victoria Island, Lagos",
+        phone: "+234 802 345 6789",
+        distance: "2.5 km away",
+        available: true,
+    },
+    {
+        id: 3,
+        name: "Elite Mechanics Hub",
+        mechanicName: "David Adeyemi",
+        specialty: "Brakes & Suspension",
+        experience: "10 years",
+        rating: 4.9,
+        price: "₦18,000",
+        openTime: "8am",
+        closeTime: "7pm",
+        daysOpen: "Mon - Fri",
+        location: "Lekki Phase 1, Lagos",
+        phone: "+234 803 456 7890",
+        distance: "4.0 km away",
+        available: false,
+    },
+    {
+        id: 4,
+        name: "24/7 Mobile Mechanics",
+        mechanicName: "Emmanuel Nwachukwu",
+        specialty: "General Diagnostics",
+        experience: "6 years",
+        rating: 4.6,
+        price: "₦10,000",
+        openTime: "24hrs",
+        closeTime: "24hrs",
+        daysOpen: "Mon - Sun",
+        location: "Gbagada, Lagos",
+        phone: "+234 804 567 8901",
+        distance: "3.8 km away",
+        available: true,
+    },
+    {
+        id: 5,
+        name: "Premium Auto Clinic",
+        mechanicName: "Abdul Suleiman",
+        specialty: "Luxury & Sports Cars",
+        experience: "12 years",
+        rating: 5.0,
+        price: "₦25,000",
+        openTime: "9am",
+        closeTime: "6pm",
+        daysOpen: "Mon - Sat",
+        location: "Banana Island, Lagos",
+        phone: "+234 805 678 9012",
+        distance: "5.5 km away",
+        available: true,
+    },
+];
 
-                <View className="flex flex-row items-center justify-between mt-2">
-                    <ThemedText className="!font-bold !text-2xl">
-                        ₦2,600
-                    </ThemedText>
-                    <View className="flex flex-row items-center">
-                        <IconSymbol name="star.fill" color="orange" size={18} />
-                        <Text className="!text-lg !text-gray-400 ml-2">
-                            4.0
-                        </Text>
-                    </View>
+export default function Service({ image, i, index }: any) {
+    console.log(index)
+    if (!mechanicsData[i]) return null;
+    return (
+        <View className="mb-6">
+            <View className="w-full h-40 rounded-3xl overflow-hidden relative">
+                <Image source={image} className="h-full w-full" />
+                <View className={`absolute top-4 left-4 px-3 py-1 rounded-full ${mechanicsData[i].available ? 'bg-green-500' : 'bg-red-500'}`}>
+                    <Text className="text-white text-xs font-bold">
+                        {mechanicsData[i].available ? 'Available Now' : 'Busy'}
+                    </Text>
                 </View>
+
+                <View className="absolute top-4 right-4 bg-black/70 px-3 py-1 rounded-full">
+                    <Text className="text-white text-xs">
+                        {mechanicsData[i].distance}
+                    </Text>
+                </View>
+
+                <TouchableOpacity className="w-12 h-12 bg-white rounded-full absolute bottom-5 right-5 flex justify-center items-center">
+                    <IconSymbol name="heart.fill" color="orange" size={20} />
+                </TouchableOpacity>
             </View>
-        </ThemedView>
+
+            <View className="p-2 mt-2 w-full">
+                <Link href={`/user`}>
+                    <View className="w-full">
+                        <View className="flex-row justify-between items-start">
+                            <View className="flex-1">
+                                <ThemedText
+                                    numberOfLines={1}
+                                    className="!font-bold !text-xl"
+                                >
+                                    {mechanicsData[i].name}
+                                </ThemedText>
+                            </View>
+                            <View className="flex-row items-center">
+                                <IconSymbol name="star.fill" color="orange" size={16} />
+                                <Text className="!text-sm !text-gray-600 ml-1 font-bold">
+                                    {mechanicsData[i].experience}
+                                </Text>
+                            </View>
+                        </View>
+                        <View className="flex flex-row items-center justify-between mt-2">
+                            <View>
+                                <Text className="!text-base !text-gray-700 mt-1">
+                                    {mechanicsData[i].specialty}
+                                </Text>
+
+                                <Text numberOfLines={1} className="!text-xs !text-gray-400 mt-1">
+                                    Open ({mechanicsData[i].openTime}), Closes ({mechanicsData[i].closeTime}) {mechanicsData[i].daysOpen}
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity className="bg-orange-500 px-4 py-2 rounded-full">
+                                <Text className="text-white font-bold text-sm">
+                                    Book Now
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Link>
+            </View>
+        </View>
     );
 }
 
@@ -151,9 +261,8 @@ export const Gallery = ({ text, image, bold }: any) => {
             <View className="flex-row flex-wrap">
                 {Object.values(services).map((each: any, i: any) => (
                     <View
-                        className={`${
-                            full.includes(i) ? "w-full h-44" : "w-1/2 h-52"
-                        } p-3`}
+                        className={`${full.includes(i) ? "w-full h-44" : "w-1/2 h-52"
+                            } p-3`}
                     >
                         <Image source={each} className={"w-full h-full rounded-xl"} />
                     </View>

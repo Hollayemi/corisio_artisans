@@ -1,7 +1,7 @@
 // 1. Store configuration (store/index.ts)
 import { configureStore } from '@reduxjs/toolkit';
 import { addressApi } from './slices/addressSlice';
-import authReducer, { authApi } from './slices/authSlice';
+// import authReducer, { authApi } from './slices/authSlice';
 import { cartApi } from './slices/cartSlice';
 import { chatApi } from './slices/chatSlice';
 import { feedbackApi } from './slices/feedbackSlice';
@@ -12,13 +12,13 @@ import { pickupApi } from './slices/pickupSlice';
 import { referralApi } from './slices/referralSlice';
 import { savedItemsApi } from './slices/saveItemSlice';
 import { storeApi } from './slices/storeSlice';
-import { userApi } from './slices/userSlice2';
+import { userApi } from './slices/userSlice';
 import { viewsApi } from './slices/viewSlice';
 
 export const store = configureStore({
     reducer: {
-        auth: authReducer,
-        [authApi.reducerPath]: authApi.reducer,
+        // auth: authReducer,
+        // [authApi.reducerPath]: authApi.reducer,
         [userApi.reducerPath]: userApi.reducer,
         [homeApi.reducerPath]: homeApi.reducer,
         [cartApi.reducerPath]: cartApi.reducer,
@@ -36,7 +36,7 @@ export const store = configureStore({
 
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware()
-            .concat(authApi.middleware)
+            // .concat(authApi.middleware)
             .concat(userApi.middleware)
             .concat(homeApi.middleware)
             .concat(cartApi.middleware)

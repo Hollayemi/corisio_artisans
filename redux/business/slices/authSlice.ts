@@ -21,7 +21,7 @@ export const authApi = createApi({
         // Returns: { success, message, data: { phoneNumber, message, otp? } }
         sendOtp: builder.mutation<AuthResponse, SendOtpPayload>({
             query: (payload: SendOtpPayload) => ({
-                url: '/stores/auth/send-otp',
+                url: `/${payload.from === "user" ? "users" : "stores"}/auth/send-otp`,
                 method: 'POST',
                 data: payload,
             }),
@@ -105,9 +105,6 @@ export const authApi = createApi({
         }),
 
         // POST /stores/register
-        // Body:    { storeName, ownerInfo, category (ObjectId), address, description?, website?, referralCode?, openingHours? }
-        // Returns: { success, data: { store: { id, storeName, onboardingStatus, profileCompletionScore, referralCode } } }
-        // Note:    Requires bearer token from verifyOtp. Transitions onboardingStatus → "profile_complete"
         registerStore: builder.mutation<AuthResponse, RegisterStorePayload>({
             query: (payload) => ({
                 url: '/stores/register',
@@ -128,8 +125,6 @@ export const authApi = createApi({
         }),
 
         // PUT /stores/profile
-        // Body:    { description?, openingHours?, website?, storeName?, ownerInfo?, address? }
-        // Returns: { success, data: { store } }
         updateProfile: builder.mutation<AuthResponse, UpdateProfilePayload>({
             query: (payload) => ({
                 url: '/stores/profile',
@@ -150,7 +145,6 @@ export const authApi = createApi({
         }),
 
         // GET /stores/me
-        // Returns: { success, data: { store: { id, storeName, ownerInfo, phoneNumber, category, address, onboardingStatus, ... } } }
         getMyStore: builder.query<AuthResponse, void>({
             query: () => ({
                 url: '/stores/me',
@@ -267,7 +261,7 @@ const authSlice = createSlice({
 
             AsyncStorage.multiRemove(['store_token', 'store_refresh_token', 'store_data']);
 
-            router.replace('/business/auth/files/PhoneEntry');
+            router.replace('/auth/PhoneEntry');
         },
 
         clearError: (state) => {
@@ -350,10 +344,6 @@ export const initializeAuthAsync = () => async (dispatch: any) => {
     dispatch(initializeAuth(authState));
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
-
 export interface AuthState {
     store: StoreData | null;
     token: string | null;
@@ -363,7 +353,6 @@ export interface AuthState {
     error: string | null;
 }
 
-// Matches data.store from verify-otp and /stores/me responses
 export interface StoreData {
     id: string;
     storeName: string;
@@ -385,7 +374,7 @@ export interface StoreData {
         state: string;
         coordinates?: {
             type: 'Point';
-            coordinates: [number, number]; // [lng, lat]
+            coordinates: [number, number];
         };
     };
     description?: string;
@@ -417,14 +406,11 @@ export interface AuthResponse {
     type: 'success' | 'error';
     message: string;
     data?: {
-        // verify-otp
         token?: string;
         refreshToken?: string;
         store?: StoreData;
-        // send-otp / resend-otp
         phoneNumber?: string;
-        otp?: string; // only present in dev mode
-        // profile/completion
+        otp?: string;
         score?: number;
         readyForVerification?: boolean;
         checklist?: CompletionChecklistItem[];
@@ -440,19 +426,17 @@ export interface CompletionChecklistItem {
     required: boolean;
 }
 
-// POST /stores/auth/send-otp  &  POST /stores/auth/resend-otp
 interface SendOtpPayload {
     phoneNumber: string; // must be normalised: "+2348012345678"
     category?: Record<string, []>;
+    from?: "user" | "business";
 }
 
-// POST /stores/auth/verify-otp
 interface VerifyOtpPayload {
     phoneNumber: string;
     otp: string;
 }
 
-// POST /stores/register
 export interface RegisterStorePayload {
     storeName: string;
     ownerInfo: string;
@@ -472,7 +456,6 @@ export interface RegisterStorePayload {
     openingHours?: OpeningHour[];
 }
 
-// PUT /stores/profile
 export interface UpdateProfilePayload {
     storeName?: string;
     ownerInfo?: string;

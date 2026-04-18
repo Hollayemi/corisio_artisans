@@ -14,7 +14,10 @@ import { IconCircle } from "../home";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useUserData } from "@/hooks/useData";
 import themeConfig from "@/config/themeConfig";
-// className = "absolute !left-0 !z-50 !bottom-[40px] w-full !h-20  !bg-red-500";
+import { LogOut } from "lucide-react-native";
+import { logoutUser } from "@/redux/authService/authSlice";
+import { useDispatch } from "react-redux";
+
 export function BottomTab({
     page,
     close,
@@ -24,7 +27,9 @@ export function BottomTab({
 }) {
     const router = useRouter();
     return (
-        <View className=" flex justify-between !px-6  pt-4  !z-50  w-full">
+        <View className="flex flex-col justify-start !px-6 pt-4 !z-50 w-full h-1/2">
+            <View className="flex-1" />
+            
             <TouchableOpacity
                 onPress={() => {
                     router.push("/user");
@@ -33,7 +38,7 @@ export function BottomTab({
                 className="flex-row items-center my-4"
             >
                 <Ionicons
-                    name="home-outline"
+                    name="home"
                     color={page === "home" ? "orange" : "white"}
                     size={20}
                 />
@@ -52,7 +57,7 @@ export function BottomTab({
                 className="flex-row items-center my-4"
             >
                 <Ionicons
-                    name="fast-food-outline"
+                    name="compass"
                     color={page === "food" ? "orange" : "white"}
                     size={20}
                 />
@@ -60,7 +65,7 @@ export function BottomTab({
                     style={{ color: page === "food" ? "orange" : "white" }}
                     className="text-[16px] !font-bold ml-3"
                 >
-                    Food Court
+                    Explore
                 </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -71,7 +76,7 @@ export function BottomTab({
                 className="flex-row items-center my-4"
             >
                 <MaterialIcons
-                    name="accessible"
+                    name="work"
                     color={page === "order" ? "orange" : "white"}
                     size={20}
                 />
@@ -79,7 +84,7 @@ export function BottomTab({
                     style={{ color: page === "order" ? "orange" : "white" }}
                     className="text-[16px] !font-bold ml-3"
                 >
-                    Orders / Bookings
+                    Post a Job
                 </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -87,29 +92,10 @@ export function BottomTab({
                     router.push("/user");
                     close();
                 }}
-                className="flex-row items-center my-4"
+                className="flex-row items-center my-4 mb-8"
             >
                 <Ionicons
-                    name="cart-outline"
-                    color={page === "cart" ? "orange" : "white"}
-                    size={20}
-                />
-                <Text
-                    style={{ color: page === "cart" ? "orange" : "white" }}
-                    className="text-[16px] !font-bold ml-3"
-                >
-                    Cart
-                </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                onPress={() => {
-                    router.push("/user");
-                    close();
-                }}
-                className="flex-row items-center my-4"
-            >
-                <Ionicons
-                    name="person-outline"
+                    name="person"
                     color={page === "profile" ? "orange" : "white"}
                     size={20}
                 />
@@ -129,20 +115,25 @@ export type WrapperProps = ViewProps & {
 };
 
 export default function HomeWrapper({ children, page }: WrapperProps) {
-    const { menuValueOffset, openMenu, userInfo, bodyHeight, marginTopValue } =
-        useUserData() as any;
+    const { menuValueOffset, openMenu, userInfo, bodyHeight, marginTopValue } = useUserData() as any;
+    const datass = useUserData() as any;
+    const disPatch = useDispatch();
+    console.log(userInfo, "data from wrapper");
 
     const { height, width } = useWindowDimensions();
     const deductFromHeight = themeConfig("light").deductFromHeight;
     const adjustedHeight = height - deductFromHeight;
     const dropShadow = {
-        shadowColor: "#b0b7ec", // White shadow
+        shadowColor: "#b0b7ec",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3, // Adjust for visibility
-        shadowRadius: 7, // More blur
-        elevation: 5, // Required for Android
+        shadowOpacity: 0.3,
+        shadowRadius: 7,
+        elevation: 5,
     };
     const closeMenu = () => openMenu(true, 0);
+
+    if (!menuValueOffset) return <View className="flex-1">{children}</View>;
+
     return (
         <View className=" ">
             <LinearGradient
@@ -177,6 +168,7 @@ export default function HomeWrapper({ children, page }: WrapperProps) {
                     <Text className="!font-bold !text-white  !text-2xl ml-2">
                         {userInfo.fullname}
                     </Text>
+                    <LogOut onPress={() => {disPatch(logoutUser())}} />
                 </View>
                 <View className=" h-screen w-full relative !z-10">
                     <View className="">

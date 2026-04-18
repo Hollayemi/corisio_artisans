@@ -1,5 +1,5 @@
+import { server } from "@/config/server";
 import toaster from "@/config/toaster";
-import LocationManager from "@/hooks/useCoordinates";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
@@ -7,8 +7,6 @@ import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import { jsonHeader } from "./setAuthHeaders";
-import { server } from "@/config/server";
-
 
 // Define error types for better type safety
 export enum ErrorType {
@@ -53,12 +51,10 @@ interface ApiResponse {
     to?: string;
 }
 
-// let server = "https://corislo-backend.onrender.com";
 
-
-// if (process.env.NODE_ENV === "development") {
-//     }
-
+// if (process.env.NODE_ENV === "production") {
+//     server = "https://corislo-backend.onrender.com";
+// }
 
 // Enhanced navigation helper
 const navigateToErrorPage = async (errorType: ErrorType) => {
@@ -68,18 +64,17 @@ const navigateToErrorPage = async (errorType: ErrorType) => {
                 pathname: "/broken",
                 params: { errorType: "network" },
             });
-
-            break;
+        break;
         case ErrorType.SERVER_ERROR:
             router.push({
-                pathname: "/broken",
-                params: { errorType: "server" },
+                pathname: "/auth/Login",
+                params: { errorType: "server", from: "business" },
             });
             break;
         case ErrorType.AUTH_ERROR:
             // Clear auth data and
             await AsyncStorage.multiRemove(["user_token", "refresh_token"]);
-            router.push("/user/auth/Login");
+            router.push({pathname:"/auth/Login", params: { errorType: "auth", from: "business" }});
             break;
 
         default:
@@ -87,7 +82,6 @@ const navigateToErrorPage = async (errorType: ErrorType) => {
     }
 };
 
-// Check network connectivity
 const checkNetworkConnectivity = async (): Promise<boolean> => {
     try {
         const netInfo = await NetInfo.fetch();
@@ -127,7 +121,7 @@ const categorizeError = async (
     const status = err.response?.status;
 
     // Server errors (5xx)
-    if (status && status === 500) {
+    if (status && status == 500) {
         return { errorType: ErrorType.SERVER_ERROR, shouldRetry: true };
     }
 
@@ -138,7 +132,7 @@ const categorizeError = async (
     }
 
     // Validation errors (400, 422)
-    if (status === 422) {
+    if (status === 400 || status === 422) {
         return { errorType: ErrorType.VALIDATION_ERROR, shouldRetry: false };
     }
 
@@ -151,7 +145,7 @@ const getErrorMessage = (errorType: ErrorType, errorData?: any): string => {
         case ErrorType.NETWORK_ERROR:
             return "Unable to connect to server. Please check your internet connection.";
         case ErrorType.SERVER_ERROR:
-            return "Server is experiencing issues. Please try again later.";
+            return "Login to continue. Please check your credentials.";
 
         case ErrorType.TIMEOUT_ERROR:
             return "Request timed out. Please try again.";
@@ -234,24 +228,17 @@ export const axiosBaseQuery =
             data,
             params,
             headers,
-            authType = "store",
+            authType = "user_token",
             skipErrorHandling = false,
             retryCount = 0,
         }) => {
-            const locationManager = new LocationManager()
-            const currentLocation = locationManager.getCurrentLocation();
-            console.log("currentLocation ====>", currentLocation)
-
             const makeRequest = async () => {
                 const authHeaders = authType ? await jsonHeader() : { headers: {} };
                 const mergedHeaders = {
                     ...(headers ?? {}),
                     ...(authHeaders?.headers ?? {}),
-                    'x-latitude': currentLocation?.latitude?.toString(),
-                    'x-longitude': currentLocation?.longitude?.toString()
-
                 };
-                console.log(`${server}/api/v1${url}`)
+
                 const res = await axios({
                     url: `${server}/api/v1${url}`,
                     method,
@@ -262,7 +249,7 @@ export const axiosBaseQuery =
                 });
                 const { type, message } = res.data || {};
                 if (type === "success" && message !== "success") {
-                    toaster({ type, message });
+                    // toaster({ type, message });
                 }
                 return res;
             };
@@ -278,8 +265,12 @@ export const axiosBaseQuery =
 
                 return { data: result.data };
             } catch (axiosError) {
+
                 const err = axiosError as AxiosError;
+                console.log("err.response?.status", err, err.response?.status)
                 const { errorType, shouldRetry } = await categorizeError(err);
+
+
 
                 const customError: CustomError = {
                     status: err.response?.status || errorType,
@@ -330,6 +321,7 @@ const checkTokenStatus = async (): Promise<{
 
         return { isValid: false, needsRefresh: false };
     } catch (error) {
+        console.log(error);
         return { isValid: false, needsRefresh: false };
     }
 };
@@ -358,5 +350,6 @@ export const clearAuthData = async () => {
             "user_data",
         ]);
     } catch (error) {
+        console.error("Error clearing auth data:", error);
     }
 };

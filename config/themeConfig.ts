@@ -12,10 +12,10 @@ export const services = {
     service2: require("@/assets/images/more/service2.png"),
     service3: require("@/assets/images/more/service3.png"),
     service4: require("@/assets/images/more/service4.png"),
-    service5: require("@/assets/images/more/service5.png"),
-    service6: require("@/assets/images/more/service6.png"),
-    service7: require("@/assets/images/more/service7.png"),
-    laundry: require("@/assets/images/more/laundry.png"),
+    // service5: require("@/assets/images/more/service5.png"),
+    // service6: require("@/assets/images/more/service6.png"),
+    // service7: require("@/assets/images/more/service7.png"),
+    // laundry: require("@/assets/images/more/laundry.png"),
 };
 
 export const addon = {
