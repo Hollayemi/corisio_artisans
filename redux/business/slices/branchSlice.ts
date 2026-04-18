@@ -1,7 +1,7 @@
 
 import { ApiResponse, setCoordinatesPayload } from '@/helper/prop';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 interface Branch {
     id: string;
@@ -45,7 +45,7 @@ interface ProductSuggestion {
 
 export const branchApi = createApi({
     reducerPath: 'branchApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Branch', 'ProductSuggestion', 'BranchInfo'],
     endpoints: (builder) => ({
         // Branch CRUD

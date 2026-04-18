@@ -19,7 +19,7 @@ interface saveAddress {
 
 export const addressApi = createApi({
     reducerPath: 'addressApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Address'],
     endpoints: (builder) => ({
 

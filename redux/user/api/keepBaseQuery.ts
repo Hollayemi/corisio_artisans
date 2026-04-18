@@ -184,4 +184,4 @@ export const clearAuthData = async (): Promise<void> => {
 };
 
 // Default instance
-export const api = axiosBaseQuery();
+export const api = axiosBaseQuery("user");

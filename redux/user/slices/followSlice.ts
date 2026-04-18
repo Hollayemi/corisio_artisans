@@ -30,7 +30,7 @@ interface Store {
 // Following Stores Slice
 export const followingApi = createApi({
     reducerPath: 'followingApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Following'],
     endpoints: (builder) => ({
         // Follow store

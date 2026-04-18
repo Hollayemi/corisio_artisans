@@ -40,7 +40,7 @@ interface Notification {
 // User Slice
 export const userApi = createApi({
     reducerPath: 'userApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['User', 'Notification', 'Search'],
     endpoints: (builder) => ({
         // Get user account

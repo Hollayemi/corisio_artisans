@@ -4,7 +4,7 @@
 
 import { ApiResponse } from '@/helper/prop';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 interface Store {
     id: string;
@@ -40,7 +40,7 @@ interface CreateStoreRequest {
 
 export const storeApi = createApi({
     reducerPath: 'storeApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Store', 'StoreRole', 'StoreConfig'],
     endpoints: (builder) => ({
         // Store Management

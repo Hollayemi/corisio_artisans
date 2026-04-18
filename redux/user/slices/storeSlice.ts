@@ -27,7 +27,7 @@ interface ViewProp {
 // Views Slice
 export const storeApi = createApi({
     reducerPath: 'storeApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Store', 'Search'],
     endpoints: (builder) => ({
         // Set view

@@ -1,22 +1,15 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-
-// Import global CSS file
-// import AndroidSafeAreaView from "@/components/ui/AndroidSaveArea";
 import { StoreDataProvider } from "@/context/storeContext";
 import { isAuthenticated } from "@/redux/business/slices/api/axiosBaseQuery";
-import { store } from "@/redux/business/store";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Provider } from "react-redux";
 
 export default function BusinessLayout() {
-    
     return (
         <SafeAreaProvider>
             {/* <AndroidSafeAreaView
                 style={{ flex: 1, backgroundColor: "#f9fafb" }}
             > */}
-            <Provider store={store}>
                 <StoreDataProvider>
                     <Stack screenOptions={{ headerShown: false }}>
                         {!isAuthenticated() && <Stack.Screen
@@ -28,7 +21,6 @@ export default function BusinessLayout() {
                         <Stack.Screen name="auth" options={{ headerShown: false }} />
                     </Stack>
                 </StoreDataProvider>
-            </Provider>
             <StatusBar style="auto" />
 
             {/* </AndroidSafeAreaView> */}

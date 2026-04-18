@@ -22,7 +22,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { router } from 'expo-router';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // ─── Storage keys (namespaced away from store auth) ───────────────────────────
 
@@ -105,7 +105,7 @@ export interface UpdateProfilePayload {
 
 export const userApi = createApi({
     reducerPath: 'userApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['User'],
     endpoints: (builder) => ({
 

@@ -1,6 +1,6 @@
 import { ApiResponse } from '@/helper/prop';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 interface Campaign {
     id: string;
@@ -85,7 +85,7 @@ interface Notification {
 
 export const campaignsDashboardApi = createApi({
     reducerPath: 'campaignsDashboardApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Campaign', 'Announcement', 'Dashboard', 'Notification'],
     endpoints: (builder) => ({
         // Campaigns

@@ -1,9 +1,6 @@
-// redux/business/slices/jobsSlice.ts
-// Jobs / Requests feature — RTK Query + local applied-jobs state
-
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -170,7 +167,7 @@ export const MOCK_JOBS: Job[] = [
 
 export const jobsApi = createApi({
     reducerPath: 'jobsApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Jobs', 'MyApplications'],
     endpoints: (builder) => ({
 

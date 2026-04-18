@@ -1,512 +1,301 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { router } from 'expo-router';
-import { axiosBaseQuery } from '../business/slices/api/axiosBaseQuery';
+// redux/authService/authSlice.ts
+// ONE slice managing both store-owner and regular-user sessions.
+// Replaces: authSlice.ts, authSlices.ts, authService/authSlice.ts
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createApi, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { router } from "expo-router";
+import { axiosBaseQuery, clearAllTokens } from "@/redux/shared/axiosBaseQuery";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type AuthParty = "user" | "business";
+
+export interface AuthState {
+    party:           AuthParty | null;   // who is logged in
+    token:           string | null;
+    refreshToken:    string | null;
+    isAuthenticated: boolean;
+    data:            Record<string, any>; // store or user object
+    error:           string | null;
+}
+
+// ─── Initial state (sync-loaded from AsyncStorage in _layout.tsx) ────────────
+
+const initialState: AuthState = {
+    party:           null,
+    token:           null,
+    refreshToken:    null,
+    isAuthenticated: false,
+    data:            {},
+    error:           null,
+};
+
+// ─── RTK Query API ────────────────────────────────────────────────────────────
+// All four auth endpoints work for BOTH user and business via the `party` param.
 
 export const authApi = createApi({
-    reducerPath: 'authApi',
-    baseQuery: axiosBaseQuery(),
-    tagTypes: ['Auth', 'StoreProfile', 'Completion', 'UserProfile'],
+    reducerPath: "authApi",
+    // No token needed for OTP / verify — they ARE the login flow
+    baseQuery: axiosBaseQuery("none"),
+    tagTypes: ["Auth"],
     endpoints: (builder) => ({
 
-        sendOtp: builder.mutation<AuthResponse, SendOtpPayload>({
-            query: (payload: SendOtpPayload) => ({
-                url: `/${payload.from === "user" ? "users" : "stores"}/auth/send-otp`,
-                method: 'POST',
-                data: payload,
+        /**
+         * Step 1 — request OTP
+         * POST /users/auth/send-otp   (party === "user")
+         * POST /stores/auth/send-otp  (party === "business")
+         */
+        sendOtp: builder.mutation<
+            ApiEnvelope<{ phoneNumber: string; message: string }>,
+            { phoneNumber: string; party: AuthParty; category?: Record<string, any> }
+        >({
+            query: ({ phoneNumber, party, category }) => ({
+                url: `/${party === "user" ? "users" : "stores"}/auth/send-otp`,
+                method: "POST",
+                data: { phoneNumber, ...(category && { category }) },
+                skipErrorHandling: true,  // let PhoneNumber screen show inline error
             }),
         }),
 
-        // POST /stores/auth/verify-otp
-        // Body:    { phoneNumber, otp }
-        // Returns: { success, message, data: { store, token, refreshToken } }
-        verifyOtp: builder.mutation<AuthResponse, VerifyOtpPayload>({
-            query: (payload) => ({
-                url: `/${payload.from === "user" ? "users" : "stores"}/auth/verify-otp`,
-                method: 'POST',
-                data: payload,
+        /**
+         * Step 2 — verify OTP → receive token
+         * POST /users/auth/verify-otp   (party === "user")
+         * POST /stores/auth/verify-otp  (party === "business")
+         *
+         * On success, persists token + profile data to AsyncStorage + Redux.
+         */
+        verifyOtp: builder.mutation<
+            ApiEnvelope<VerifyOtpResponse>,
+            { phoneNumber: string; otp: string; party: AuthParty }
+        >({
+            query: ({ phoneNumber, otp, party }) => ({
+                url: `/${party === "user" ? "users" : "stores"}/auth/verify-otp`,
+                method: "POST",
+                data: { phoneNumber, otp },
+                skipErrorHandling: true,
             }),
-            invalidatesTags: ['Auth'],
-            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+            invalidatesTags: ["Auth"],
+            async onQueryStarted({ party }, { dispatch, queryFulfilled }) {
                 try {
                     const { data } = await queryFulfilled;
-                    if (data.data?.token && data.data?.refreshToken) {
-                        dispatch(setCredentials({
-                            token: data.data.token,
-                            refreshToken: data.data.refreshToken,
-                            data: data.data
-                        }));
-                    }
-                } catch (error) {
-                    console.error('OTP verification failed:', error);
+                    const { token, refreshToken } = data.data;
+                    const profileData = data.data.store ?? data.data.user ?? {};
+
+                    dispatch(setCredentials({ party, token, refreshToken, data: profileData }));
+                } catch {
+                    // component handles error via .unwrap()
                 }
             },
         }),
 
-        // POST /stores/auth/resend-otp
-        // Body:    { phoneNumber }
-        // Returns: { success, message }
-        resendOtp: builder.mutation<AuthResponse, { phoneNumber: string; from: "user"|"business" }>({
+        /**
+         * Step 3 — resend OTP
+         */
+        resendOtp: builder.mutation<
+            ApiEnvelope<{ message: string }>,
+            { phoneNumber: string; party: AuthParty }
+        >({
+            query: ({ phoneNumber, party }) => ({
+                url: `/${party === "user" ? "users" : "stores"}/auth/resend-otp`,
+                method: "POST",
+                data: { phoneNumber },
+                skipErrorHandling: true,
+            }),
+        }),
+
+        /**
+         * Register store (business onboarding step 4)
+         */
+        registerStore: builder.mutation<ApiEnvelope<any>, RegisterStorePayload>({
             query: (payload) => ({
-                url: `/${payload.from === "user" ? "users" : "stores"}/auth/resend-otp`,
-                method: 'POST',
+                url: "/stores/register",
+                method: "POST",
                 data: payload,
+                tokenOwner: "store",
             }),
         }),
 
-        // POST /stores/auth/refresh-token
-        // Body:    { refreshToken }
-        // Returns: { success, data: { token, refreshToken } }
-        refreshAuthToken: builder.mutation<AuthResponse, { refreshToken: string }>({
+        /**
+         * Register / complete user profile (user onboarding)
+         */
+        registerUser: builder.mutation<ApiEnvelope<any>, RegisterUserPayload>({
             query: (payload) => ({
-                url: '/stores/auth/refresh-token',
-                method: 'POST',
+                url: "/users/auth/complete-profile",
+                method: "POST",
                 data: payload,
+                tokenOwner: "user",
             }),
-            async onQueryStarted(_, { dispatch, queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    if (data.data?.token && data.data.refreshToken) {
-                        dispatch(setTokens({
-                            token: data.data.token,
-                            refreshToken: data.data.refreshToken,
-                        }));
-                    }
-                } catch (error) {
-                    // Refresh failed — session is dead, force logout
-                    console.error('Token refresh failed:', error);
-                    dispatch(logoutUser());
-                }
-            },
         }),
 
-        // POST /stores/auth/logout
-        // No body required — bearer token in header identifies the store
-        logout: builder.mutation<AuthResponse, void>({
-            query: () => ({
-                url: '/stores/auth/logout',
-                method: 'POST',
+        /**
+         * Logout — clears server session
+         */
+        logoutRemote: builder.mutation<ApiEnvelope<null>, { party: AuthParty }>({
+            query: ({ party }) => ({
+                url: `/${party === "user" ? "users" : "stores"}/auth/logout`,
+                method: "POST",
+                tokenOwner: party === "user" ? "user" : "store",
             }),
-            invalidatesTags: ['Auth', 'StoreProfile'],
-            async onQueryStarted(_, { dispatch }) {
-                // Clear state immediately, don't wait for server response
-                dispatch(logoutUser());
-            },
-        }),
-
-        // POST /stores/register
-        registerStore: builder.mutation<AuthResponse, RegisterStorePayload>({
-            query: (payload) => ({
-                url: '/stores/register',
-                method: 'POST',
-                data: payload,
-            }),
-            invalidatesTags: ['StoreProfile', 'Completion'],
-            async onQueryStarted(_, { dispatch, queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    if (data.data?.store) {
-                        dispatch(updateStoreData(data.data.store));
-                    }
-                } catch (error) {
-                    console.error('Store registration failed:', error);
-                }
-            },
-        }),
-        // POST /user/register
-        registerUser: builder.mutation<AuthResponse, RegisterUserPayload>({
-            query: (payload) => ({
-                url: '/users/auth/complete-profile',
-                method: 'POST',
-                data: payload,
-            }),
-            invalidatesTags: ['UserProfile', 'Completion'],
-            async onQueryStarted(_, { dispatch, queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    if (data.data?.user) {
-                        dispatch(updateUserData(data.data.user));
-                    }
-                } catch (error) {
-                    console.error('Account registration failed:', error);
-                }
-            },
-        }),
-
-        // PUT /stores/profile
-        updateProfile: builder.mutation<AuthResponse, UpdateProfilePayload>({
-            query: (payload) => ({
-                url: '/stores/profile',
-                method: 'PUT',
-                data: payload,
-            }),
-            invalidatesTags: ['StoreProfile', 'Completion'],
-            async onQueryStarted(_, { dispatch, queryFulfilled }) {
-                try {
-                    const { data } = await queryFulfilled;
-                    if (data.data?.store) {
-                        dispatch(updateStoreData(data.data.store));
-                    }
-                } catch (error) {
-                    console.error('Profile update failed:', error);
-                }
-            },
-        }),
-
-        // GET /stores/me
-        getMyStore: builder.query<AuthResponse, void>({
-            query: () => ({
-                url: '/stores/me',
-                method: 'GET',
-            }),
-            providesTags: ['StoreProfile'],
-        }),
-
-        // GET /stores/profile/completion
-        // Returns: { success, data: { score, readyForVerification, checklist: [...] } }
-        getProfileCompletion: builder.query<AuthResponse, void>({
-            query: () => ({
-                url: '/stores/profile/completion',
-                method: 'GET',
-            }),
-            providesTags: ['Completion'],
         }),
     }),
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Async helper to rehydrate state from AsyncStorage on app launch
-// ─────────────────────────────────────────────────────────────────────────────
-
-const initializeAuthState = async (): Promise<Partial<AuthState>> => {
-    try {
-        const token = await AsyncStorage.getItem('store_token');
-        const refreshToken = await AsyncStorage.getItem('store_refresh_token');
-        const storeDataString = await AsyncStorage.getItem('store_data');
-        const storeData = storeDataString ? JSON.parse(storeDataString) : null;
-
-        return {
-            store: storeData,
-            token,
-            refreshToken,
-            isAuthenticated: !!token,
-            loading: false,
-            error: null,
-        };
-    } catch (error) {
-        return {
-            store: null,
-            token: null,
-            refreshToken: null,
-            isAuthenticated: false,
-            loading: false,
-            error: null,
-        };
-    }
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Initial state
-// ─────────────────────────────────────────────────────────────────────────────
-
-const initialState: AuthState = {
-    store: null,
-    user: null,
-    token: null,
-    refreshToken: null,
-    isAuthenticated: false,
-    loading: false,
-    error: null,
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Auth slice
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Slice ────────────────────────────────────────────────────────────────────
 
 const authSlice = createSlice({
-    name: 'auth',
+    name: "auth",
     initialState,
     reducers: {
-        setCredentials: (state, action: PayloadAction<{
-            token: string;
-            refreshToken: string;
-            data: any; // can be either StoreData or UserData depending on login type
-        }>) => {
-            const { token, refreshToken, data } = action.payload;
-            const isStoreData = 'storeName' in data;
-            const accessTokenKey = isStoreData ? 'store_token' : 'user_token';
-            const refreshTokenKey = isStoreData ? 'store_refresh_token' : 'user_refresh_token';
-            state.store = isStoreData ? (data as StoreData) : null;
-            state.user = !isStoreData ? (data as UserData) : null;
-            state.token = token;
-            state.refreshToken = refreshToken;
+        /** Persists tokens + profile after verifyOtp */
+        setCredentials: (
+            state,
+            action: PayloadAction<{
+                party: AuthParty;
+                token: string;
+                refreshToken: string;
+                data: Record<string, any>;
+            }>
+        ) => {
+            const { party, token, refreshToken, data } = action.payload;
+            state.party           = party;
+            state.token           = token;
+            state.refreshToken    = refreshToken;
             state.isAuthenticated = true;
-            state.error = null;
+            state.data            = data;
+            state.error           = null;
 
-            AsyncStorage.setItem(accessTokenKey, token);
-            AsyncStorage.setItem(refreshTokenKey, refreshToken);
-            AsyncStorage.setItem('data', JSON.stringify(data));
+            const tokenKey   = party === "user" ? "user_token"         : "store_token";
+            const refreshKey = party === "user" ? "user_refresh_token"  : "store_refresh_token";
+            const dataKey    = party === "user" ? "user_data"           : "store_data";
+
+            AsyncStorage.setItem(tokenKey,   token);
+            AsyncStorage.setItem(refreshKey, refreshToken);
+            AsyncStorage.setItem(dataKey,    JSON.stringify(data));
         },
 
-        setTokens: (state, action: PayloadAction<{ token: string; refreshToken: string }>) => {
-            state.token = action.payload.token;
-            state.refreshToken = action.payload.refreshToken;
-
-            AsyncStorage.setItem('store_token', action.payload.token);
-            AsyncStorage.setItem('store_refresh_token', action.payload.refreshToken);
+        /** Patch profile fields without a full refetch */
+        patchProfileData: (state, action: PayloadAction<Record<string, any>>) => {
+            state.data = { ...state.data, ...action.payload };
+            const key  = state.party === "user" ? "user_data" : "store_data";
+            AsyncStorage.setItem(key, JSON.stringify(state.data));
         },
 
-        // Called after registerStore / updateProfile to patch store fields
-        updateStoreData: (state, action: PayloadAction<Partial<StoreData>>) => {
-            if (state.store) {
-                state.store = { ...state.store, ...action.payload };
-                AsyncStorage.setItem('store_data', JSON.stringify(state.store));
-            }
-        },
-
-        updateUserData: (state, action: PayloadAction<Partial<UserData>>) => {
-            if (state.user) {
-                state.user = { ...state.user, ...action.payload };
-                AsyncStorage.setItem('user_data', JSON.stringify(state.user));
-            }
-        },
-
+        /**
+         * Logout — call this from ANY screen.
+         * Clears AsyncStorage, Redux state, and navigates to login.
+         */
         logoutUser: (state) => {
-            console.log('User logged out, state cleared');
-            state.store = null;
-            state.user = null;
-            state.token = null;
-            state.refreshToken = null;
+            const wasParty = state.party;
+            state.party           = null;
+            state.token           = null;
+            state.refreshToken    = null;
             state.isAuthenticated = false;
-            state.error = null;
+            state.data            = {};
+            state.error           = null;
 
-            AsyncStorage.multiRemove(['store_token', 'store_refresh_token', 'store_data']);
-            AsyncStorage.multiRemove(['user_token', 'user_refresh_token', 'user_data']);
+            clearAllTokens(); // removes all token keys from AsyncStorage
 
-            console.log('User logged out, state cleared');
-
-            router.replace('/auth/PhoneEntry');
+            // Navigate to the right login screen
+            router.replace("/auth/Login");
         },
 
-        clearError: (state) => {
-            state.error = null;
-        },
-
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.loading = action.payload;
-        },
-
-        setError: (state, action: PayloadAction<string>) => {
-            state.error = action.payload;
-        },
-
+        /** Hydrate from AsyncStorage on app start */
         initializeAuth: (state, action: PayloadAction<Partial<AuthState>>) => {
             Object.assign(state, action.payload);
         },
     },
-    extraReducers: (builder) => {
-        builder
-            // Sync full store profile into Redux when getMyStore resolves
-            .addMatcher(
-                authApi.endpoints.getMyStore.matchFulfilled,
-                (state, action) => {
-                    if (action.payload.data?.store) {
-                        state.store = action.payload.data.store;
-                        AsyncStorage.setItem('store_data', JSON.stringify(state.store));
-                    }
-                }
-            );
-    },
 });
 
-export const {
-    setCredentials,
-    setTokens,
-    updateStoreData,
-    updateUserData,
-    logoutUser,
-    clearError,
-    setLoading,
-    setError,
-    initializeAuth,
-} = authSlice.actions;
+export const { setCredentials, patchProfileData, logoutUser, initializeAuth } =
+    authSlice.actions;
 
 export default authSlice.reducer;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Exported hooks
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── App-start hydration (call once in _layout.tsx) ──────────────────────────
+
+export const initializeAuthAsync = () => async (dispatch: any) => {
+    try {
+        // Try store first, then user
+        let token        = await AsyncStorage.getItem("store_token");
+        let refreshToken = await AsyncStorage.getItem("store_refresh_token");
+        let rawData      = await AsyncStorage.getItem("store_data");
+        let party: AuthParty = "business";
+
+        if (!token) {
+            token        = await AsyncStorage.getItem("user_token");
+            refreshToken = await AsyncStorage.getItem("user_refresh_token");
+            rawData      = await AsyncStorage.getItem("user_data");
+            party        = "user";
+        }
+
+        if (token) {
+            dispatch(
+                initializeAuth({
+                    party,
+                    token,
+                    refreshToken,
+                    data:            rawData ? JSON.parse(rawData) : {},
+                    isAuthenticated: true,
+                })
+            );
+        }
+    } catch {
+        // stay unauthenticated
+    }
+};
+
+// ─── Exported hooks ───────────────────────────────────────────────────────────
 
 export const {
     useSendOtpMutation,
     useVerifyOtpMutation,
     useResendOtpMutation,
-    useRefreshAuthTokenMutation,
-    useLogoutMutation,
-    useRegisterUserMutation,
     useRegisterStoreMutation,
-    useUpdateProfileMutation,
-    useGetMyStoreQuery,
-    useGetProfileCompletionQuery,
+    useRegisterUserMutation,
+    useLogoutRemoteMutation,
 } = authApi;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Selectors
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Selectors ────────────────────────────────────────────────────────────────
 
-export const selectCurrentStore = (state: { auth: AuthState }) => state.auth.store;
-export const selectCurrentToken = (state: { auth: AuthState }) => state.auth.token;
-export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.isAuthenticated;
-export const selectAuthLoading = (state: { auth: AuthState }) => state.auth.loading;
-export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
-export const selectOnboardingStatus = (state: { auth: AuthState }) => state.auth.store?.onboardingStatus;
+export const selectAuthParty          = (s: { auth: AuthState }) => s.auth.party;
+export const selectIsAuthenticated    = (s: { auth: AuthState }) => s.auth.isAuthenticated;
+export const selectProfileData        = (s: { auth: AuthState }) => s.auth.data;
+export const selectToken              = (s: { auth: AuthState }) => s.auth.token;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Async action — rehydrate from AsyncStorage on app launch
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Supporting types ─────────────────────────────────────────────────────────
 
-export const initializeAuthAsync = () => async (dispatch: any) => {
-    const authState = await initializeAuthState();
-    dispatch(initializeAuth(authState));
-};
-
-export interface AuthState {
-    store: StoreData | null;
-    user: UserData | null;
-    token: string | null;
-    refreshToken: string | null;
-    isAuthenticated: boolean;
-    loading: boolean;
-    error: string | null;
-}
-
-export interface UserData {
-    id: string;
-    fullname: string;
-    email: string;
-    phoneNumber: string;
-    referralCode: string;
-    photo?: string;
-    isPhoneVerified?: boolean;
-}
-
-export interface StoreData {
-    id: string;
-    storeName: string;
-    ownerInfo: string;
-    phoneNumber: string;
-    onboardingStatus: OnboardingStatus;
-    referralCode: string;
-    profileCompletionScore?: number;
-    boost?: {
-        level: 'none' | 'bronze' | 'silver' | 'gold';
-        totalReferrals: number;
-        expiresAt?: string;
-        isActive?: boolean;
-    };
-    category?: { _id: string; name: string };
-    address?: {
-        raw: string;
-        lga: string;
-        state: string;
-        coordinates?: {
-            type: 'Point';
-            coordinates: [number, number];
-        };
-    };
-    description?: string;
-    website?: string;
-    photos?: string[];
-    openingHours?: OpeningHour[];
-    isPhoneVerified?: boolean;
-    isFeatured?: boolean;
-    rejectionReason?: string;
-}
-
-export type OnboardingStatus =
-    | 'registered'
-    | 'phone_verified'
-    | 'profile_complete'
-    | 'verified'
-    | 'rejected';
-
-export interface OpeningHour {
-    day: string;   // "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"
-    open: string;  // "08:00"
-    close: string; // "20:00"
-    isClosed: boolean;
-}
-
-// Unified API response wrapper matching Corisio's envelope shape
-export interface AuthResponse {
+interface ApiEnvelope<T> {
     success: boolean;
-    type: 'success' | 'error';
+    type?: "success" | "error";
     message: string;
-    data?: {
-        token?: string;
-        refreshToken?: string;
-        store?: StoreData;
-        user?: UserData;
-        phoneNumber?: string;
-        otp?: string;
-        score?: number;
-        readyForVerification?: boolean;
-        checklist?: CompletionChecklistItem[];
-    };
-    timestamp?: string;
+    data: T;
 }
 
-export interface CompletionChecklistItem {
-    field: string;
-    label: string;
-    complete: boolean;
-    points: number;
-    required: boolean;
-}
-
-interface SendOtpPayload {
-    phoneNumber: string; // must be normalised: "+2348012345678"
-    category?: Record<string, []>;
-    from?: "user" | "business";
-}
-
-interface VerifyOtpPayload {
-    phoneNumber: string;
-    otp: string;
-    from: "user" | "business";
+interface VerifyOtpResponse {
+    token:        string;
+    refreshToken: string;
+    store?:       Record<string, any>;
+    user?:        Record<string, any>;
 }
 
 export interface RegisterStorePayload {
-    storeName: string;
-    ownerInfo: string;
-    category: {}; // category ObjectId string
+    storeName:   string;
+    ownerInfo:   string;
+    category:    Record<string, any>;
     address: {
-        raw: string;
-        lga: string;
-        state?: string;
-        coordinates?: {
-            type: 'Point';
-            coordinates: [number, number]; // [lng, lat]
-        };
+        raw:         string;
+        lga:         string;
+        state?:      string;
+        coordinates?: { type: "Point"; coordinates: [number, number] };
     };
     description?: string;
-    website?: string;
+    website?:     string;
     referralCode?: string;
-    openingHours?: OpeningHour[];
 }
 
 export interface RegisterUserPayload {
-    fullname: string;
-    email: string;
+    fullname:      string;
+    email?:        string;
     referralCode?: string;
-}
-
-export interface UpdateProfilePayload {
-    storeName?: string;
-    ownerInfo?: string;
-    description?: string;
-    website?: string;
-    openingHours?: OpeningHour[];
-    address?: Partial<RegisterStorePayload['address']>;
 }

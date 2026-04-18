@@ -20,6 +20,7 @@ import { server } from '@/config/server';
 import { Provider } from 'react-redux';
 import { store } from '@/redux/store';
 import { AuthDataProvider } from '@/context/authContext';
+import { initializeAuthAsync } from '@/redux/authService/authSlice';
 
 // Prevent the splash screen from auto-hiding before Asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -85,6 +86,10 @@ function RootLayout() {
     });
 
     useEffect(() => {
+        store.dispatch(initializeAuthAsync());
+    }, []);
+
+    useEffect(() => {
         const checkHasRecord = async () => {
             const hasRecord = await AsyncStorage.getItem("hasRecord");
             console.log("hasRecord2", hasRecord);
@@ -113,11 +118,11 @@ function RootLayout() {
 
     const onLayoutRootView = useCallback(async () => {
         if (appIsReady && loaded) {
-          await SplashScreen.hideAsync();
+            await SplashScreen.hideAsync();
         }
     }, [appIsReady, loaded]);
 
-   if (!appIsReady || !loaded) {
+    if (!appIsReady || !loaded) {
         return <CustomSplashScreen setAppReady={setAppIsReady} />;
     }
 
@@ -125,35 +130,34 @@ function RootLayout() {
 
     return (
         <Provider store={store}>
-        <View className="flex-1" onLayout={onLayoutRootView}>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                <ToastContainer
-                    style={{
-                        top: 0, // adjust offset from top
-                        zIndex: 9999, // make sure it's above everything
-                        paddingHorizontal: 0,
-
-                    }}
-                    toastStyle={{
-                        backgroundColor: "#333",
-                        borderRadius: 10,
-                        padding: 0,
-                    }}
-                />
-                <AuthDataProvider>
-                    <Stack>
-                        <Stack.Screen name="auth" options={{ headerShown: false }} />
-                        <Stack.Screen name="home" options={{ headerShown: false }} />
-                        <Stack.Screen name="(welcome)" options={{ headerShown: false }} />
-                        <Stack.Screen name="user" options={{ headerShown: false }} />
-                        <Stack.Screen name="business" options={{ headerShown: false }} />
-                        <Stack.Screen name="broken" options={{ headerShown: false }} />
-                        <Stack.Screen name="+not-found" />
-                    </Stack>
-                    <StatusBar style="auto" />
-                </AuthDataProvider>
-            </ThemeProvider>
-        </View>
+            <View className="flex-1" onLayout={onLayoutRootView}>
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <ToastContainer
+                        style={{
+                            top: 0,
+                            zIndex: 9999,
+                            paddingHorizontal: 0,
+                        }}
+                        toastStyle={{
+                            backgroundColor: "#333",
+                            borderRadius: 10,
+                            padding: 0,
+                        }}
+                    />
+                    <AuthDataProvider>
+                        <Stack>
+                            <Stack.Screen name="auth" options={{ headerShown: false }} />
+                            <Stack.Screen name="home" options={{ headerShown: false }} />
+                            <Stack.Screen name="(welcome)" options={{ headerShown: false }} />
+                            <Stack.Screen name="user" options={{ headerShown: false }} />
+                            <Stack.Screen name="business" options={{ headerShown: false }} />
+                            <Stack.Screen name="broken" options={{ headerShown: false }} />
+                            <Stack.Screen name="+not-found" />
+                        </Stack>
+                        <StatusBar style="auto" />
+                    </AuthDataProvider>
+                </ThemeProvider>
+            </View>
         </Provider>
     );
 }

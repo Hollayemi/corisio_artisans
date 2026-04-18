@@ -17,7 +17,7 @@ interface AccontProp {
 // Views Slice
 export const referralApi = createApi({
     reducerPath: 'referralApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Refer'],
     endpoints: (builder) => ({
         // Set view

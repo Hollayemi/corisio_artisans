@@ -33,7 +33,7 @@ interface SavedItem {
 
 export const savedItemsApi = createApi({
     reducerPath: 'savedItemsApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['SavedItem'],
     endpoints: (builder) => ({
         // Save item

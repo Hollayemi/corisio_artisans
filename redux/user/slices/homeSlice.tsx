@@ -71,7 +71,7 @@ interface GetProductParams {
 
 export const homeApi = createApi({
     reducerPath: 'homeApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Product', 'Search', 'HomeData'],
     endpoints: (builder) => ({
         // Get all products (requires authentication)

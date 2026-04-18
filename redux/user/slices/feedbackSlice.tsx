@@ -20,7 +20,7 @@ interface saveProductFeedbacks {
 
 export const feedbackApi = createApi({
     reducerPath: 'feedbackApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Feedback'],
     endpoints: (builder) => ({
 

@@ -1,10 +1,10 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // Create API service
 export const productApi = createApi({
     reducerPath: "productApi",
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     endpoints: (builder) => ({
         uploadProduct: builder.mutation<ApiResponse, saveProducts>({
             query: (payload) => ({

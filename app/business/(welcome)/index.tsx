@@ -135,7 +135,7 @@ const OnboardingScreen: React.FC = () => {
                     <TouchableOpacity
                         className="w-full py-4 rounded-full mb-4 shadow-sm"
                         style={{ backgroundColor: "#84cc16" }}
-                        onPress={() => router.push("/business/auth/PhoneEntry")}
+                        onPress={() => router.push("/auth/PhoneEntry")}
                         activeOpacity={0.8}
                     >
                         <Text className="text-white text-center text-lg font-semibold">

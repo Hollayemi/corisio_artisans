@@ -18,7 +18,7 @@ interface ViewProp {
 // Views Slice
 export const chatApi = createApi({
     reducerPath: 'chatApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Chat'],
     endpoints: (builder) => ({
         // Set view

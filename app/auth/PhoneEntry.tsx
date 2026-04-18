@@ -11,12 +11,12 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { PageHeader, PhoneNumber } from "../business/auth/component";
+import { PageHeader } from "../business/auth/component";
+import { PhoneNumberInput } from "./PhoneNumberInput";
+import { AuthParty } from "@/redux/authService/authSlice";
 
-// Strip non-digits, remove leading zero, prepend +234
-type from = "user" | "business";
 export default function PhoneEntry() {
-    const { categories, from } = useLocalSearchParams<{ categories: string, from:from  }>();
+    const { categories, party } = useLocalSearchParams<{ categories: string, party: AuthParty }>();
 
     return (
         <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
@@ -34,10 +34,14 @@ export default function PhoneEntry() {
                     <View className="pt-6">
                         <PageHeader
                             title="What's Your Number?"
-                            subtitle={`We'll send a one-time code to verify your ${from === "user" ? "account" : "store"}. No spam.`}
+                            subtitle={`We'll send a one-time code to verify your ${party === "user" ? "account" : "store"}. No spam.`}
                         />
-                        <PhoneNumber pathname="/auth/PhoneVerify" data={{categories: categories ?? {}, type:"create-account", from }} />
-
+                        <PhoneNumberInput
+                            party={party}
+                            nextScreen="/auth/PhoneVerify"
+                            type="create-account"
+                            categories={categories}
+                        />
                         <View className="mt-6 flex-row justify-center">
                             <Text className="text-gray-500 dark:text-gray-400">
                                 Already registered?{" "}

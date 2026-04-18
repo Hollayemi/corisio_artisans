@@ -1,6 +1,6 @@
 import { ApiResponse, updateOrderPayload } from '@/helper/prop';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 interface Order {
     id: string;
@@ -68,7 +68,7 @@ interface CustomerSegmentation {
 
 export const ordersCustomersApi = createApi({
     reducerPath: 'ordersCustomersApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Order', 'Customer', 'Cart', 'OrderCount'],
     endpoints: (builder) => ({
         // Orders

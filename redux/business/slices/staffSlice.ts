@@ -1,7 +1,7 @@
 
 import { ApiResponse } from '@/helper/prop';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 import { UploadImageRequest } from './branchSlice';
 
 interface Staff {
@@ -50,7 +50,7 @@ interface ResetPasswordRequest {
 
 export const staffApi = createApi({
     reducerPath: 'staffApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Staff', 'LoggedInStaff'],
     endpoints: (builder) => ({
         // Staff CRUD

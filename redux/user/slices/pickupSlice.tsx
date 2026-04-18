@@ -33,7 +33,7 @@ interface PickupAgent {
 // Pickup Agent Slice
 export const pickupApi = createApi({
     reducerPath: 'pickupApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Pickup'],
     endpoints: (builder) => ({
         // Add pickup agent

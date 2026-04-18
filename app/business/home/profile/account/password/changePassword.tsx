@@ -2,7 +2,7 @@
 import Button from '@/components/form/Button';
 import ModalComponent from '@/components/modal';
 import StoreWrapper from '@/components/wrapper/business';
-import { logoutUser, useChangePasswordMutation } from '@/redux/business/slices/authSlices';
+import { logoutUser } from '@/redux/authService/authSlice';
 import { EyeClosed, EyeIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -57,7 +57,6 @@ const PasswordInput: React.FC<{
 );
 
 const ChangePasswordScreen: React.FC = () => {
-    const [changePassword, { isLoading }] = useChangePasswordMutation()
     const dispatch = useDispatch()
     const [showOtpModal, setShowOtpModal] = useState<boolean>(true)
     const [passwords, setPasswords] = useState<PasswordForm>({
@@ -103,29 +102,7 @@ const ChangePasswordScreen: React.FC = () => {
         return true;
     };
 
-    const handleChangePassword = async () => {
-        if (!validatePasswords()) return;
-
-        changePassword(passwords).then((result: any) => result.type === "success" && dispatch(logoutUser()));
-
-        // Alert.alert(
-        //     'Success',
-        //     'Password changed successfully',
-        //     [{
-        //         text: 'OK',
-        //         onPress: () => {
-        //             // Navigate back or reset form
-        //             setPasswords({
-        //                 oldPassword: '',
-        //                 newPassword: '',
-        //                 confirmPassword: '',
-        //             });
-        //         }
-        //     }]
-        // );
-
-    };
-
+ 
     const getPasswordStrength = (password: string): { strength: string; color: string; width: string } => {
         if (password.length === 0) return { strength: '', color: '', width: '0%' };
 
@@ -245,13 +222,7 @@ const ChangePasswordScreen: React.FC = () => {
                     {/* Change Password Button */}
                 </View>
             </ScrollView>
-            <View className='pb-4 px-4 bg-gray-50 dark:bg-gray-900'>
-                <Button
-                    isLoading={isLoading}
-                    onPress={handleChangePassword}
-                    title="Change"
-                />
-            </View>
+          
 
             <ModalComponent
                 visible={showOtpModal}

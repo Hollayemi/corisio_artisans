@@ -68,13 +68,13 @@ const navigateToErrorPage = async (errorType: ErrorType) => {
         case ErrorType.SERVER_ERROR:
             router.push({
                 pathname: "/auth/Login",
-                params: { errorType: "server", from: "business" },
+                params: { errorType: "server", party: "business" },
             });
             break;
         case ErrorType.AUTH_ERROR:
             // Clear auth data and
             await AsyncStorage.multiRemove(["store_token", "refresh_token"]);
-            router.push({pathname:"/auth/Login", params: { errorType: "auth", from: "business" }});
+            router.push({pathname:"/auth/Login", params: { errorType: "auth", party: "business" }});
             break;
 
         default:

@@ -2,7 +2,7 @@
 // Covers: per-store engagement analytics + platform-wide engagement (admin)
 
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +68,7 @@ interface ApiResponse<T> {
 
 export const engagementApi = createApi({
     reducerPath: 'engagementApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Engagement'],
     endpoints: (builder) => ({
 

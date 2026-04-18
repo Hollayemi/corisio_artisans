@@ -30,7 +30,7 @@ interface CartItem {
 
 export const cartApi = createApi({
     reducerPath: 'cartApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Cart'],
     endpoints: (builder) => ({
         // Add to cart

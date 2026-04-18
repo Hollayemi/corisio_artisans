@@ -2,7 +2,7 @@
 // Covers: Store referral code, my referrals list, stats, boost status, send SMS
 
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -95,7 +95,7 @@ interface ApiResponse<T> {
 
 export const referralApi = createApi({
     reducerPath: 'referralApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Referral', 'BoostStatus'],
     endpoints: (builder) => ({
 

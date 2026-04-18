@@ -4,7 +4,7 @@ import ProgressHeader from "@/components/wrapper/business/headers/authHeader";
 import {
     RegisterStorePayload,
     useRegisterStoreMutation,
-} from "@/redux/business/slices/authSlice";
+} from "@/redux/authService/authSlice";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
@@ -345,7 +345,7 @@ export default function ProfileSetup() {
             // Response: { success, data: { store: { id, storeName, onboardingStatus, profileCompletionScore, referralCode } } }
             // updateStoreData is dispatched automatically in authSlice onQueryStarted
             console.log({payload})
-            await registerStore(payload).then(res => {
+            await registerStore(payload).then((res:any) => {
                 router.replace("/business/auth/StoreImages");
             });
 

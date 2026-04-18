@@ -43,7 +43,7 @@ interface getOrdersProp {
 // Order Slice
 export const orderApi = createApi({
     reducerPath: 'orderApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("user"),
     tagTypes: ['Order'],
     endpoints: (builder) => ({
         // Create new order

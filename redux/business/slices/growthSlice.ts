@@ -5,7 +5,7 @@ import { axiosBaseQuery } from "./api/axiosBaseQuery";
 // Create API service
 export const growthApi = createApi({
     reducerPath: "growthApi",
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     endpoints: (builder) => ({
         // Store endpoints
         getBranchInfo: builder.mutation<ApiResponse, StorePayload>({

@@ -1,7 +1,7 @@
 import ModalComponent from '@/components/modal';
 import StoreWrapper from '@/components/wrapper/business';
 import { useStoreData } from '@/hooks/useData';
-import { logoutUser } from '@/redux/authService/authSlice';
+import { logoutUser, useLogoutRemoteMutation } from '@/redux/authService/authSlice';
 import { router } from 'expo-router';
 import { ChevronRightIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -50,6 +50,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ title, items }) => {
 
 const ProfileHomeScreen: React.FC = () => {
     const { storeInfo }: any = useStoreData();
+    const [logoutRemote, {isLoading: logingOut}] = useLogoutRemoteMutation()
     const dispatch = useDispatch()
     const isDark = useColorScheme() === 'dark'
     const [logoutModal, showLogoutModal] = useState<boolean>(false)
@@ -125,7 +126,16 @@ const ProfileHomeScreen: React.FC = () => {
                 <LogoutModal
                     visible={logoutModal}
                     onClose={() => showLogoutModal(false)}
-                    onActivate={() => { dispatch(logoutUser()); showLogoutModal(false) }}
+                    // onActivate={() => { dispatch(logoutUser()); showLogoutModal(false) }}
+                    onActivate={async () => {
+                        try {
+                            await logoutRemote({ party: "business" }).unwrap();
+                        } catch {
+                            // don't block logout even if server call fails
+                        }
+                        dispatch(logoutUser());
+                        showLogoutModal(false);
+                    }}
                 />
             </ModalComponent>
         </StoreWrapper>

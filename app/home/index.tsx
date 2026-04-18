@@ -13,19 +13,15 @@ import { ThemedView } from "@/components/ThemedView";
 
 import { useState } from "react";
 import { Image, ScrollView, View } from "react-native";
-import Search from "./search";
 import themeConfig, { services } from "@/config/themeConfig";
 import { useUserData } from "@/hooks/useData";
 import HomeWrapper from "@/components/wrapper";
-import { useGetFeaturedCategoriesQuery } from "@/redux/business/slices/growthSlice";
 
 export default function Landing() {
     const [filter, setFilter] = useState("All");
     const [search, setSearch] = useState(false);
     const { userInfo } = useUserData() as any;
-    // const { data: cates, isLoading, refetch } = useGetFeaturedCategoriesQuery(false);
-    // const categoryTree = cates ? cates?.data : [];
-    // console.log("categoryTree", categoryTree);
+
     return (
         <HomeWrapper className="relative" page="home">
             <ThemedView className="">

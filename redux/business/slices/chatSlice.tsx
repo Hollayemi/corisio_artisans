@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from './api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // Common interfaces
 interface ApiResponse<T> {
@@ -18,7 +18,7 @@ interface ViewProp {
 // Views Slice
 export const chatApi = createApi({
     reducerPath: 'chatApi',
-    baseQuery: axiosBaseQuery(),
+    baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Chat'],
     endpoints: (builder) => ({
         // Set view
