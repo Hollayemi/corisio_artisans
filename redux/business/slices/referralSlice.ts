@@ -94,7 +94,7 @@ interface ApiResponse<T> {
 // ─── API Slice ─────────────────────────────────────────────────────────────────
 
 export const referralApi = createApi({
-    reducerPath: 'referralApi',
+    reducerPath: 'userReferralApi',
     baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Referral', 'BoostStatus'],
     endpoints: (builder) => ({

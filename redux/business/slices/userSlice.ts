@@ -1,23 +1,3 @@
-// redux/user/slices/userSlice.ts
-//
-// Covers all auth + profile for regular (customer) users.
-// Completely separate from store auth — different AsyncStorage keys,
-// different reducerPath, different JWT token.
-//
-// Auth flow:
-//   sendOtp  →  verifyOtp  →  [new user] updateProfile
-//                           →  [returning] straight to app
-//
-// Endpoints (assumed /users/* — update prefix to match backend):
-//   POST /users/auth/send-otp
-//   POST /users/auth/verify-otp
-//   POST /users/auth/resend-otp
-//   POST /users/auth/refresh-token
-//   POST /users/auth/logout
-//   GET  /users/me
-//   PUT  /users/me
-//   POST /users/me/avatar
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
@@ -104,7 +84,7 @@ export interface UpdateProfilePayload {
 // ─── RTK Query API────────────────────────
 
 export const userApi = createApi({
-    reducerPath: 'userApi',
+    reducerPath: 'userAccountApi',
     baseQuery: axiosBaseQuery("store"),
     tagTypes: ['User'],
     endpoints: (builder) => ({

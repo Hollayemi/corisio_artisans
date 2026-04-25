@@ -39,7 +39,7 @@ interface CreateStoreRequest {
 
 
 export const storeApi = createApi({
-    reducerPath: 'storeApi',
+    reducerPath: 'userStoreApi',
     baseQuery: axiosBaseQuery("store"),
     tagTypes: ['Store', 'StoreRole', 'StoreConfig'],
     endpoints: (builder) => ({

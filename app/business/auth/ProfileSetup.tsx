@@ -8,7 +8,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
-import { Formik } from "formik";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
@@ -20,7 +19,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import * as yup from "yup";
 import { PageHeader } from "./component";
 
 // Abuja LGAs
@@ -33,22 +31,68 @@ const ABUJA_LGAS = [
     "Kwali",
 ];
 
-// Validation schema
-const ProfileSchema = yup.object().shape({
-    storeName: yup.string().max(100, "Max 100 characters").required("Business name is required"),
-    ownerInfo: yup.string().max(80, "Max 80 characters").required("Owner name is required"),
-    addressRaw: yup.string().required("Address is required"),
-    lga: yup.string().required("LGA is required"),
-    description: yup.string().max(500, "Max 500 characters").optional(),
-    website: yup
-        .string()
-        .optional()
-        .test("url-or-empty", "Enter a valid URL (https://...)", (val) => {
-            if (!val || val.length === 0) return true;
-            return /^https?:\/\/.+/.test(val);
-        }),
-    referralCode: yup.string().optional(),
-});
+// ── Validation functions ──
+const validateStoreName = (value: string): string => {
+    if (!value.trim()) return "Business name is required";
+    if (value.length > 100) return "Max 100 characters";
+    return "";
+};
+
+const validateOwnerInfo = (value: string): string => {
+    if (!value.trim()) return "Owner name is required";
+    if (value.length > 80) return "Max 80 characters";
+    return "";
+};
+
+const validateAddressRaw = (value: string): string => {
+    if (!value.trim()) return "Address is required";
+    return "";
+};
+
+const validateLga = (value: string): string => {
+    if (!value.trim()) return "LGA is required";
+    return "";
+};
+
+const validateDescription = (value: string): string => {
+    if (value.length > 500) return "Max 500 characters";
+    return "";
+};
+
+const validateWebsite = (value: string): string => {
+    if (!value.trim()) return "";
+    const urlRegex = /^https?:\/\/.+/;
+    if (!urlRegex.test(value)) return "Enter a valid URL (https://...)";
+    return "";
+};
+
+const validateReferralCode = (value: string): string => {
+    return "";
+};
+
+// ── Score calculator (mirrors server-side logic) ──
+const calcScore = (
+    values: { 
+        storeName: string; 
+        ownerInfo: string; 
+        addressRaw: string; 
+        lga: string; 
+        description: string; 
+        website: string 
+    }, 
+    hasCoords: boolean
+) => {
+    let total = 0;
+    if (values.storeName) total += 15;
+    total += 10; // phone already verified
+    if (values.ownerInfo) total += 10;
+    total += 10; // category already selected upstream
+    if (values.addressRaw && values.lga) total += 15;
+    if (values.description) total += 10;
+    if (values.website) total += 5;
+    // photo (+15) and openingHours (+10) come from sub-screens
+    return Math.min(total, 100);
+};
 
 // ── Subcomponents ──────────────────────────────────────────────────────────
 
@@ -87,10 +131,12 @@ function LgaPicker({
     selected,
     onSelect,
     error,
+    touched,
 }: {
     selected: string;
     onSelect: (v: string) => void;
     error?: string;
+    touched?: boolean;
 }) {
     const [open, setOpen] = useState(false);
 
@@ -102,7 +148,7 @@ function LgaPicker({
             <TouchableOpacity
                 onPress={() => setOpen(!open)}
                 className={`flex-row items-center justify-between border-2 rounded-xl px-4 h-14 bg-gray-50 dark:bg-gray-800
-                    ${error ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
+                    ${error && touched ? "border-red-400" : "border-gray-200 dark:border-gray-700"}`}
             >
                 <Text
                     className={
@@ -143,7 +189,7 @@ function LgaPicker({
                     ))}
                 </View>
             )}
-            {error ? (
+            {error && touched ? (
                 <Text className="text-red-500 text-[12px] mt-1">{error}</Text>
             ) : null}
         </View>
@@ -282,51 +328,187 @@ function SubScreenCard({
     );
 }
 
-// ── Score calculator (mirrors server-side logic) ─────────────────────────────
-const calcScore = (values: { storeName: string; ownerInfo: string; addressRaw: string; lga: string; description: string; website: string }, hasCoords: boolean) => {
-    let total = 0;
-    if (values.storeName) total += 15;
-    total += 10; // phone already verified
-    if (values.ownerInfo) total += 10;
-    total += 10; // category already selected upstream
-    if (values.addressRaw && values.lga) total += 15;
-    if (values.description) total += 10;
-    if (values.website) total += 5;
-    // photo (+15) and openingHours (+10) come from sub-screens
-    return Math.min(total, 100);
-};
-
 // ── Main screen ──────────────────────────────────────────────────────────────
 
 export default function ProfileSetup() {
     const { categories } = useLocalSearchParams<{ categories: any }>();
     const [coords, setCoords] = useState<[number, number] | null>(null);
     const [apiError, setApiError] = useState("");
+    
+    // Form state
+    const [formData, setFormData] = useState({
+        storeName: "",
+        ownerInfo: "",
+        addressRaw: "",
+        lga: "",
+        description: "",
+        website: "",
+        referralCode: "",
+    });
+    
+    // Validation errors
+    const [errors, setErrors] = useState({
+        storeName: "",
+        ownerInfo: "",
+        addressRaw: "",
+        lga: "",
+        description: "",
+        website: "",
+        referralCode: "",
+    });
+    
+    // Touched state for showing errors
+    const [touched, setTouched] = useState({
+        storeName: false,
+        ownerInfo: false,
+        addressRaw: false,
+        lga: false,
+        description: false,
+        website: false,
+        referralCode: false,
+    });
 
     console.log({categories})
 
-    // ── RTK Query mutation ──────────────────────────────────────────────────
+    // ── RTK Query mutation ──
     const [registerStore, { isLoading }] = useRegisterStoreMutation();
 
-    const handleSubmit = async (values: {
-        storeName: string;
-        ownerInfo: string;
-        addressRaw: string;
-        lga: string;
-        description: string;
-        website: string;
-        referralCode: string;
-    }) => {
+    // Handle field changes
+    const handleChange = (field: keyof typeof formData) => (value: string) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        
+        // Validate on change
+        let error = "";
+        switch (field) {
+            case "storeName":
+                error = validateStoreName(value);
+                break;
+            case "ownerInfo":
+                error = validateOwnerInfo(value);
+                break;
+            case "addressRaw":
+                error = validateAddressRaw(value);
+                break;
+            case "lga":
+                error = validateLga(value);
+                break;
+            case "description":
+                error = validateDescription(value);
+                break;
+            case "website":
+                error = validateWebsite(value);
+                break;
+            case "referralCode":
+                error = validateReferralCode(value);
+                break;
+        }
+        setErrors(prev => ({ ...prev, [field]: error }));
+    };
+
+    // Handle blur for showing errors
+    const handleBlur = (field: keyof typeof touched) => () => {
+        setTouched(prev => ({ ...prev, [field]: true }));
+        
+        // Validate on blur
+        let error = "";
+        switch (field) {
+            case "storeName":
+                error = validateStoreName(formData.storeName);
+                break;
+            case "ownerInfo":
+                error = validateOwnerInfo(formData.ownerInfo);
+                break;
+            case "addressRaw":
+                error = validateAddressRaw(formData.addressRaw);
+                break;
+            case "lga":
+                error = validateLga(formData.lga);
+                break;
+            case "description":
+                error = validateDescription(formData.description);
+                break;
+            case "website":
+                error = validateWebsite(formData.website);
+                break;
+            case "referralCode":
+                error = validateReferralCode(formData.referralCode);
+                break;
+        }
+        setErrors(prev => ({ ...prev, [field]: error }));
+    };
+
+    // Check if form is valid
+    const isValid = () => {
+        return (
+            validateStoreName(formData.storeName) === "" &&
+            validateOwnerInfo(formData.ownerInfo) === "" &&
+            validateAddressRaw(formData.addressRaw) === "" &&
+            validateLga(formData.lga) === "" &&
+            validateDescription(formData.description) === "" &&
+            validateWebsite(formData.website) === "" &&
+            validateReferralCode(formData.referralCode) === ""
+        );
+    };
+
+    // Check if form is dirty (has any filled required fields or changes)
+    const isDirty = () => {
+        return (
+            formData.storeName.trim() !== "" ||
+            formData.ownerInfo.trim() !== "" ||
+            formData.addressRaw.trim() !== "" ||
+            formData.lga.trim() !== "" ||
+            formData.description.trim() !== "" ||
+            formData.website.trim() !== "" ||
+            formData.referralCode.trim() !== ""
+        );
+    };
+
+    const handleSubmit = async () => {
+        // Validate all fields on submit
+        const storeNameError = validateStoreName(formData.storeName);
+        const ownerInfoError = validateOwnerInfo(formData.ownerInfo);
+        const addressRawError = validateAddressRaw(formData.addressRaw);
+        const lgaError = validateLga(formData.lga);
+        const descriptionError = validateDescription(formData.description);
+        const websiteError = validateWebsite(formData.website);
+        const referralCodeError = validateReferralCode(formData.referralCode);
+        
+        setErrors({
+            storeName: storeNameError,
+            ownerInfo: ownerInfoError,
+            addressRaw: addressRawError,
+            lga: lgaError,
+            description: descriptionError,
+            website: websiteError,
+            referralCode: referralCodeError,
+        });
+        
+        setTouched({
+            storeName: true,
+            ownerInfo: true,
+            addressRaw: true,
+            lga: true,
+            description: true,
+            website: true,
+            referralCode: true,
+        });
+        
+        // Check if form is valid
+        if (storeNameError || ownerInfoError || addressRawError || lgaError || 
+            descriptionError || websiteError || referralCodeError) {
+            return;
+        }
+        
         setApiError("");
 
         const payload: RegisterStorePayload = {
-            storeName: values.storeName,
-            ownerInfo: values.ownerInfo,
+            storeName: formData.storeName,
+            ownerInfo: formData.ownerInfo,
             // category is the first item in categories JSON; server stores it on the account
             category: categories,
             address: {
-                raw: values.addressRaw,
-                lga: values.lga,
+                raw: formData.addressRaw,
+                lga: formData.lga,
                 state: "FCT",
                 ...(coords && {
                     coordinates: {
@@ -335,20 +517,16 @@ export default function ProfileSetup() {
                     },
                 }),
             },
-            ...(values.description && { description: values.description }),
-            ...(values.website && { website: values.website }),
-            ...(values.referralCode && { referralCode: values.referralCode }),
+            ...(formData.description && { description: formData.description }),
+            ...(formData.website && { website: formData.website }),
+            ...(formData.referralCode && { referralCode: formData.referralCode }),
         };
 
         try {
-            // POST /stores/register
-            // Response: { success, data: { store: { id, storeName, onboardingStatus, profileCompletionScore, referralCode } } }
-            // updateStoreData is dispatched automatically in authSlice onQueryStarted
             console.log({payload})
             await registerStore(payload).then((res:any) => {
                 router.replace("/business/auth/StoreImages");
             });
-
         } catch (err: any) {
             setApiError(err?.data?.message ?? "Could not save your profile. Please try again.");
         }
@@ -362,154 +540,129 @@ export default function ProfileSetup() {
             >
                 <ProgressHeader currentStep={4} />
 
-                <Formik
-                    validationSchema={ProfileSchema}
-                    initialValues={{
-                        storeName: "",
-                        ownerInfo: "",
-                        addressRaw: "",
-                        lga: "",
-                        description: "",
-                        website: "",
-                        referralCode: "",
-                    }}
-                    onSubmit={handleSubmit}
+                <ScrollView
+                    className="flex-1"
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                 >
-                    {({
-                        handleChange,
-                        handleBlur,
-                        handleSubmit: formikSubmit,
-                        values,
-                        errors,
-                        touched,
-                        setFieldValue,
-                        isValid,
-                        dirty,
-                    }) => (
-                        <ScrollView
-                            className="flex-1"
-                            showsVerticalScrollIndicator={false}
-                            keyboardShouldPersistTaps="handled"
-                        >
-                            <View className="pt-6">
-                                <PageHeader
-                                    title="Set Up Your Business"
-                                    subtitle="Tell us about your business so customers can discover you."
-                                />
+                    <View className="pt-6">
+                        <PageHeader
+                            title="Set Up Your Business"
+                            subtitle="Tell us about your business so customers can discover you."
+                        />
 
-                                <View className="px-6">
-                                    <CompletionBar score={calcScore(values, !!coords)} />
+                        <View className="px-6">
+                            <CompletionBar score={calcScore(formData, !!coords)} />
 
-                                    {/* ── Required ── */}
-                                    <SectionLabel text="Required Information" />
+                            {/* ── Required ── */}
+                            <SectionLabel text="Required Information" />
 
-                                    <InputField
-                                        label="Business Name *"
-                                        placeholder="e.g. Amina's Boutique"
-                                        value={values.storeName}
-                                        onChangeText={handleChange("storeName")}
-                                        onBlur={handleBlur("storeName")}
-                                        error={touched.storeName ? errors.storeName : ""}
-                                    />
+                            <InputField
+                                label="Business Name *"
+                                placeholder="e.g. Amina's Boutique"
+                                value={formData.storeName}
+                                onChangeText={handleChange("storeName")}
+                                onBlur={handleBlur("storeName")}
+                                error={touched.storeName ? errors.storeName : ""}
+                            />
 
-                                    <InputField
-                                        label="Owner Name *"
-                                        placeholder="Your full name"
-                                        value={values.ownerInfo}
-                                        onChangeText={handleChange("ownerInfo")}
-                                        onBlur={handleBlur("ownerInfo")}
-                                        error={touched.ownerInfo ? errors.ownerInfo : ""}
-                                    />
+                            <InputField
+                                label="Owner Name *"
+                                placeholder="Your full name"
+                                value={formData.ownerInfo}
+                                onChangeText={handleChange("ownerInfo")}
+                                onBlur={handleBlur("ownerInfo")}
+                                error={touched.ownerInfo ? errors.ownerInfo : ""}
+                            />
 
-                                    <InputField
-                                        label="Street Address *"
-                                        placeholder="e.g. 12 Wuse Market Road"
-                                        value={values.addressRaw}
-                                        onChangeText={handleChange("addressRaw")}
-                                        onBlur={handleBlur("addressRaw")}
-                                        error={touched.addressRaw ? errors.addressRaw : ""}
-                                    />
+                            <InputField
+                                label="Street Address *"
+                                placeholder="e.g. 12 Wuse Market Road"
+                                value={formData.addressRaw}
+                                onChangeText={handleChange("addressRaw")}
+                                onBlur={handleBlur("addressRaw")}
+                                error={touched.addressRaw ? errors.addressRaw : ""}
+                            />
 
-                                    <LgaPicker
-                                        selected={values.lga}
-                                        onSelect={(v) => setFieldValue("lga", v)}
-                                        error={touched.lga ? errors.lga : ""}
-                                    />
+                            <LgaPicker
+                                selected={formData.lga}
+                                onSelect={(v) => {
+                                    setFormData(prev => ({ ...prev, lga: v }));
+                                    const error = validateLga(v);
+                                    setErrors(prev => ({ ...prev, lga: error }));
+                                    setTouched(prev => ({ ...prev, lga: true }));
+                                }}
+                                error={errors.lga}
+                                touched={touched.lga}
+                            />
 
-                                    <GpsButton onCapture={setCoords} coords={coords} />
+                            <GpsButton onCapture={setCoords} coords={coords} />
 
-                                    {/* ── Optional ── */}
-                                    <SectionLabel text="Optional (boosts your score)" />
+                            {/* ── Optional ── */}
+                            <SectionLabel text="Optional (boosts your score)" />
 
-                                    <InputField
-                                        label="Description"
-                                        placeholder="Tell customers what makes your store special…"
-                                        value={values.description}
-                                        onChangeText={handleChange("description")}
-                                        onBlur={handleBlur("description")}
-                                        multiline
-                                        error={touched.description ? errors.description : ""}
-                                    />
-                                    <CharCount current={values.description.length} max={500} />
+                            <InputField
+                                label="Description"
+                                placeholder="Tell customers what makes your store special…"
+                                value={formData.description}
+                                onChangeText={handleChange("description")}
+                                onBlur={handleBlur("description")}
+                                multiline
+                                error={touched.description ? errors.description : ""}
+                            />
+                            <CharCount current={formData.description.length} max={500} />
 
-                                    <InputField
-                                        label="Website"
-                                        placeholder="https://yourstore.com"
-                                        value={values.website}
-                                        onChangeText={handleChange("website")}
-                                        onBlur={handleBlur("website")}
-                                        keyboardType="url"
-                                        error={touched.website ? errors.website : ""}
-                                    />
+                            <InputField
+                                label="Website"
+                                placeholder="https://yourstore.com"
+                                value={formData.website}
+                                onChangeText={handleChange("website")}
+                                onBlur={handleBlur("website")}
+                                keyboardType="url"
+                                error={touched.website ? errors.website : ""}
+                            />
 
-                                    <InputField
-                                        label="Referral Code"
-                                        placeholder="Were you referred? Enter their code"
-                                        value={values.referralCode}
-                                        onChangeText={handleChange("referralCode")}
-                                        onBlur={handleBlur("referralCode")}
-                                    />
+                            <InputField
+                                label="Referral Code"
+                                placeholder="Were you referred? Enter their code"
+                                value={formData.referralCode}
+                                onChangeText={handleChange("referralCode")}
+                                onBlur={handleBlur("referralCode")}
+                                error={touched.referralCode ? errors.referralCode : ""}
+                            />
 
-                                    {/* ── Sub-screen shortcuts (add to score) ── */}
-                                    <SectionLabel text="Add to reach 100%" />
+                            {/* ── Sub-screen shortcuts (add to score) ── */}
+                            <SectionLabel text="Add to reach 100%" />
 
-                                    <SubScreenCard
-                                        icon="camera"
-                                        title="Add Business Photos"
-                                        subtitle="+15 points"
-                                        onPress={() => router.push("/business/auth/ProfilePicture")}
-                                    />
-                                    {/* <SubScreenCard
-                                        icon="time"
-                                        title="Set Opening Hours"
-                                        subtitle="+10 points"
-                                        onPress={() => router.push("/business/auth/Availability")}
-                                    /> */}
+                            <SubScreenCard
+                                icon="camera"
+                                title="Add Business Photos"
+                                subtitle="+15 points"
+                                onPress={() => router.push("/business/auth/ProfilePicture")}
+                            />
 
-                                    {/* ── API-level error ── */}
-                                    {apiError ? (
-                                        <View className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 mb-4">
-                                            <Text className="text-[13px] text-red-700 dark:text-red-400">
-                                                {apiError}
-                                            </Text>
-                                        </View>
-                                    ) : null}
-
-                                    {/* ── Submit ── */}
-                                    <View className="mt-2 mb-10">
-                                        <Button
-                                            title="Save & Continue"
-                                            onPress={formikSubmit}
-                                            isLoading={isLoading}
-                                            loadingText="Saving…"
-                                            disabled={!(isValid && dirty) || isLoading}
-                                        />
-                                    </View>
+                            {/* ── API-level error ── */}
+                            {apiError ? (
+                                <View className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 mb-4">
+                                    <Text className="text-[13px] text-red-700 dark:text-red-400">
+                                        {apiError}
+                                    </Text>
                                 </View>
+                            ) : null}
+
+                            {/* ── Submit ── */}
+                            <View className="mt-2 mb-10">
+                                <Button
+                                    title="Save & Continue"
+                                    onPress={handleSubmit}
+                                    isLoading={isLoading}
+                                    loadingText="Saving…"
+                                    disabled={!(isValid() && isDirty()) || isLoading}
+                                />
                             </View>
-                        </ScrollView>
-                    )}
-                </Formik>
+                        </View>
+                    </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );

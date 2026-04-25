@@ -1,5 +1,5 @@
 
-import CategoriesGrowthChart from "@/app/business/home/analytics/categories";
+// import CategoriesGrowthChart from "@/app/business/home/analytics/categories";
 import StoreWrapper from "@/components/wrapper/business";
 import { useStoreGrowthAnalytics } from "@/hooks/useAnalyics";
 import { useGetStoreGrowthQuery } from "@/redux/business/slices/growthSlice";
@@ -18,7 +18,7 @@ export default function Insights() {
     return (
         <StoreWrapper headerTitle="Insights" active="profile">
             <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />} className="flex-1 p-2 py-4" showsVerticalScrollIndicator={false}>
-                <CategoriesGrowthChart defaultParams={queryParams} />
+                {/* <CategoriesGrowthChart defaultParams={queryParams} /> */}
             </ScrollView>
         </StoreWrapper>
     )
