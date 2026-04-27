@@ -1,4 +1,4 @@
-import { server } from "@/redux/business/slices/api/baseApi";
+import { server } from "@/config/server";
 import { UIComponentData } from "./types";
 
 class SDUIService {

@@ -1,8 +1,8 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { StoreDataProvider } from "@/context/storeContext";
-import { isAuthenticated } from "@/redux/business/slices/api/axiosBaseQuery";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { isAuthenticated } from "@/redux/shared/axiosBaseQuery";
 
 export default function BusinessLayout() {
     return (

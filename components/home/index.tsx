@@ -19,16 +19,17 @@ export function HomePattern() {
 export type UserLocationProp = {
     name: string;
     back?: boolean;
+    profile?: string;
     theme?: "dark" | "light";
 };
-export function User({ back, name, theme }: UserLocationProp) {
+export function User({ back, name, profile, theme }: UserLocationProp) {
     const { openMenu } = useUserData() as any;
     return (
         <View className="flex flex-row items-center">
             {!back ? (
                 <TouchableOpacity onPress={() => openMenu(true, 1)}>
                     <Image
-                        source={require("@/assets/images/user1.png")}
+                        source={profile ? {uri: profile} : require("@/assets/images/user1.png")}
                         className="w-14 h-14 rounded-full"
                     />
                 </TouchableOpacity>
@@ -46,7 +47,7 @@ export function User({ back, name, theme }: UserLocationProp) {
                             theme === "dark" && "!text-white"
                         } !text-xl mr-1`}
                     >
-                        Benin
+                        Lugbe, Abuja.
                     </Text>
                     <IconSymbol name="chevron.down" color="white" size={15} />
                 </View>
@@ -108,7 +109,7 @@ export function LookingForFood() {
         <View className="relative">
             <View className="w-full h-20 rounded-3xl !bg-['#FDB415'] shadow"></View>
             <Link
-                href="/user"
+                href="/home"
                 className="w-11/12 h-14 absolute top-3.5 left-4 z-20"
             >
                 <Image
@@ -152,15 +153,16 @@ export function HomeCategory({
     return (
         <Pressable
             onPress={() => setSelected(label)}
-            className={`w-36 h-14 rounded-full  ${
+            className={`w-24 h-10 rounded-full  ${
                 isSelected
                     ? "!bg-['#FFE9B8']  !border-['#FDB415']"
                     : ` border border-gray-300 dark:border-gray-600 `
             } justify-left flex flex-row justify-center !items-center px-3`}
         >
-            <Image source={icons[icon]} className="!w-8 !h-8" />
+            {/* <Image source={icons[icon]} className="!w-8 !h-8" /> */}
             <Text
-                className={`!text-xl ml-2 w-fit text-gray-500 dark:text-gray-200 ${
+            numberOfLines={1}
+                className={`!text-sm ml-2 w-fit text-gray-500 dark:text-gray-200 ${
                     isSelected && "!text-black"
                 }`}
             >

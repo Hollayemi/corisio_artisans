@@ -68,7 +68,7 @@ interface CustomerSegmentation {
 
 export const ordersCustomersApi = createApi({
     reducerPath: 'ordersCustomersApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Order', 'Customer', 'Cart', 'OrderCount'],
     endpoints: (builder) => ({
         // Orders

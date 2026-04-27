@@ -5,7 +5,7 @@ import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 export const paymentApi = createApi({
     reducerPath: 'paymentApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Staff'],
     endpoints: (builder) => ({
         getTransactions: builder.query<ApiResponse<any>, void>({

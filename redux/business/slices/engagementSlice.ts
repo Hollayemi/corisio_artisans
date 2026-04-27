@@ -68,7 +68,7 @@ interface ApiResponse<T> {
 
 export const engagementApi = createApi({
     reducerPath: 'engagementApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Engagement'],
     endpoints: (builder) => ({
 

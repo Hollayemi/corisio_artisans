@@ -95,12 +95,9 @@ interface ApiResponse<T> {
 
 export const referralApi = createApi({
     reducerPath: 'userReferralApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Referral', 'BoostStatus'],
     endpoints: (builder) => ({
-
-        // ── GET /stores/referral/my-code ─────────────────────────────────────
-        // Returns referral code, shareable link, and QR code URL
         getMyReferralCode: builder.query<ApiResponse<ReferralCodeData>, void>({
             query: () => ({
                 url: '/stores/referral/my-code',

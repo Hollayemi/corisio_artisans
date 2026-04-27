@@ -12,15 +12,32 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
 import { useState } from "react";
-import { Image, ScrollView, View } from "react-native";
+import { Image, ScrollView, View, RefreshControl } from "react-native";
 import themeConfig, { services } from "@/config/themeConfig";
 import { useUserData } from "@/hooks/useData";
 import HomeWrapper from "@/components/wrapper";
+import { useGetFeaturedCategoriesQuery } from "@/redux/business/slices/growthSlice";
 
 export default function Landing() {
     const [filter, setFilter] = useState("All");
     const [search, setSearch] = useState(false);
     const { userInfo } = useUserData() as any;
+    const [refreshing, setRefreshing] = useState(false)
+    const { data: cates, isLoading, refetch } = useGetFeaturedCategoriesQuery(false);
+
+    const handleRefresh = () => {
+        refetch();
+        setRefreshing(true);
+    }
+    const subCategotries = cates?.data?.[0]?.sub_category?.[0]?.groups?.reduce?.((acc: any[], category: any) => {
+        if (category.label) {
+            acc.push({label:category.label, value: category._id});
+        }
+        return acc;
+    }, []) || []
+
+    console.log("categories", subCategotries)
+    const userData = userInfo.user || {}
 
     return (
         <HomeWrapper className="relative" page="home">
@@ -28,7 +45,7 @@ export default function Landing() {
                 <View className="px-2 h-64 !relative w-[100%] ml !bg-['#181818'] rounded-b-[20%] overflow-hidden">
                     <HomePattern />
                     <View className="flex flex-row justify-between z-50  w-full items-center mt-16">
-                        <User name={`Hi, ${userInfo.fullname}`} theme="dark" />
+                        <User name={`Hi, ${userData.name}`} profile={userData.profile_image} theme="dark" />
                         <View className="flex flex-row items-center ">
                             <IconCircle
                                 onPress={() => setSearch(true)}
@@ -42,7 +59,7 @@ export default function Landing() {
                                 className="mr-5"
                             />
                             <IconCircle
-                                onPress={() => {}}
+                                onPress={() => { }}
                                 fixedBg="dark"
                                 icon={
                                     <Image
@@ -53,7 +70,6 @@ export default function Landing() {
                                     />
                                 }
                             />
-                            {/* <HomePattern /> */}
                         </View>
                     </View>
 
@@ -80,45 +96,29 @@ export default function Landing() {
                     />
                 </Slider>
             </ThemedView>
-            <ScrollView className=" dark:bg-gray-900 z-0 !relative">
+            <ScrollView refreshControl={
+                <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={handleRefresh}
+                />
+            } className=" dark:bg-gray-900 z-0 !relative">
                 <ThemedView className="px-3">
                     <LookingForFood />
                     <ThemedView className="flex flex-row items-center my-4">
                         <Slider
-                            itemsPerView={2.8}
+                            itemsPerView={3.8}
                             interval={7000}
                             className="!h-16"
                         >
-                            <HomeCategory
-                                icon="all"
-                                label="All"
-                                selected={filter}
-                                setSelected={setFilter}
-                            />
-                            <HomeCategory
-                                icon="hair"
-                                label="Hair Salon"
-                                selected={filter}
-                                setSelected={setFilter}
-                            />
-                            <HomeCategory
-                                icon="barber"
-                                label="Barbing"
-                                selected={filter}
-                                setSelected={setFilter}
-                            />
-                            <HomeCategory
-                                icon="laundry"
-                                label="Laundry"
-                                selected={filter}
-                                setSelected={setFilter}
-                            />
-                            <HomeCategory
-                                icon="food"
-                                label="Food"
-                                selected={filter}
-                                setSelected={setFilter}
-                            />
+                            {subCategotries.map((each: any, i: any) => (
+                                <HomeCategory
+                                    key={i}
+                                    icon="all"
+                                    label={each.label}
+                                    selected={filter}
+                                    setSelected={setFilter}
+                                />
+                            ))}
                         </Slider>
                     </ThemedView>
                     <ThemedView>

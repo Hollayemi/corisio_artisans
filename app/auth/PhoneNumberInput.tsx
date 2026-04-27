@@ -41,6 +41,7 @@ export function PhoneNumberInput({ party, nextScreen, type, categories }: PhoneN
             await sendOtp({
                 phoneNumber,
                 party,
+                type,
                 category: categories ? JSON.parse(categories) : undefined,
             }).unwrap();
 

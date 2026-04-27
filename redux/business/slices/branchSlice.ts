@@ -45,7 +45,7 @@ interface ProductSuggestion {
 
 export const branchApi = createApi({
     reducerPath: 'branchApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Branch', 'ProductSuggestion', 'BranchInfo'],
     endpoints: (builder) => ({
         // Branch CRUD

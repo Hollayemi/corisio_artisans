@@ -8,8 +8,6 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import 'react-native-reanimated';
 // Import global CSS file
 import "../global.css";
-
-import { ChatDataProvider } from '@/context/chatContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';

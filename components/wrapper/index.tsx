@@ -32,7 +32,7 @@ export function BottomTab({
             
             <TouchableOpacity
                 onPress={() => {
-                    router.push("/user");
+                    router.push("/home");
                     close();
                 }}
                 className="flex-row items-center my-4"
@@ -51,7 +51,7 @@ export function BottomTab({
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => {
-                    router.push("/user");
+                    router.push("/home");
                     close();
                 }}
                 className="flex-row items-center my-4"
@@ -70,7 +70,7 @@ export function BottomTab({
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => {
-                    router.push("/user");
+                    router.push("/home");
                     close();
                 }}
                 className="flex-row items-center my-4"
@@ -89,7 +89,7 @@ export function BottomTab({
             </TouchableOpacity>
             <TouchableOpacity
                 onPress={() => {
-                    router.push("/user");
+                    router.push("/home");
                     close();
                 }}
                 className="flex-row items-center my-4 mb-8"

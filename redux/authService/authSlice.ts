@@ -3,7 +3,9 @@
 // Replaces: authSlice.ts, authSlices.ts, authService/authSlice.ts
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createApi, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createApi } from "@reduxjs/toolkit/query/react";
+
 import { router } from "expo-router";
 import { axiosBaseQuery, clearAllTokens } from "@/redux/shared/axiosBaseQuery";
 
@@ -36,7 +38,6 @@ const initialState: AuthState = {
 
 export const authApi = createApi({
     reducerPath: "authApi",
-    // No token needed for OTP / verify — they ARE the login flow
     baseQuery: axiosBaseQuery("none"),
     tagTypes: ["Auth"],
     endpoints: (builder) => ({
@@ -48,13 +49,14 @@ export const authApi = createApi({
          */
         sendOtp: builder.mutation<
             ApiEnvelope<{ phoneNumber: string; message: string }>,
-            { phoneNumber: string; party: AuthParty; category?: Record<string, any> }
+            { phoneNumber: string; type: string, party: AuthParty; category?: Record<string, any> }
         >({
-            query: ({ phoneNumber, party, category }) => ({
+            query: ({ phoneNumber, type, party, category }) => ({
                 url: `/${party === "user" ? "users" : "stores"}/auth/send-otp`,
                 method: "POST",
-                data: { phoneNumber, ...(category && { category }) },
-                skipErrorHandling: true,  // let PhoneNumber screen show inline error
+                tokenOwner: party,
+                data: { phoneNumber, type, ...(category && { category }) },
+                skipErrorHandling: true, 
             }),
         }),
 
@@ -94,12 +96,12 @@ export const authApi = createApi({
          */
         resendOtp: builder.mutation<
             ApiEnvelope<{ message: string }>,
-            { phoneNumber: string; party: AuthParty }
+            { phoneNumber: string; party: AuthParty, type: string }
         >({
-            query: ({ phoneNumber, party }) => ({
+            query: ({ phoneNumber, party, type }) => ({
                 url: `/${party === "user" ? "users" : "stores"}/auth/resend-otp`,
                 method: "POST",
-                data: { phoneNumber },
+                data: { phoneNumber, type },
                 skipErrorHandling: true,
             }),
         }),
@@ -112,7 +114,7 @@ export const authApi = createApi({
                 url: "/stores/register",
                 method: "POST",
                 data: payload,
-                tokenOwner: "store",
+                tokenOwner: "business",
             }),
         }),
 
@@ -135,7 +137,7 @@ export const authApi = createApi({
             query: ({ party }) => ({
                 url: `/${party === "user" ? "users" : "stores"}/auth/logout`,
                 method: "POST",
-                tokenOwner: party === "user" ? "user" : "store",
+                tokenOwner: party === "user" ? "user" : "business",
             }),
         }),
     }),

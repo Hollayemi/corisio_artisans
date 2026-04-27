@@ -127,7 +127,7 @@ interface ApiResponse<T> {
 
 export const storeInfoApi = createApi({
     reducerPath: 'storeInfoApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['StoreInfo', 'Completion', 'Analytics'],
     endpoints: (builder) => ({
 

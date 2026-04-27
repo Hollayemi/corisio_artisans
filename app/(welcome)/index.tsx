@@ -135,7 +135,7 @@ const OnboardingScreen: React.FC = () => {
                     <TouchableOpacity
                         className="w-full py-4 rounded-full mb-4 shadow-sm"
                         style={{ backgroundColor: "#84cc16" }}
-                        onPress={() => router.push("/business/home")}
+                        onPress={() => router.push({ pathname: "/business/home", params: { party: "business" } })}
                         activeOpacity={0.8}
                     >
                         <Text className="text-white text-center text-lg font-semibold">
@@ -146,7 +146,7 @@ const OnboardingScreen: React.FC = () => {
                     <TouchableOpacity
                         className="w-full py-4 rounded-full"
                         style={{ backgroundColor: "#2C337C" }}
-                        onPress={() => router.push("/home")}
+                        onPress={() => router.push({ pathname: "/home", params: { party: "user" } })}
                         activeOpacity={0.8}
                     >
                         <Text

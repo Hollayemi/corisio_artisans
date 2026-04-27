@@ -37,8 +37,10 @@ export const store = configureStore({
         [staffApi.reducerPath]:             staffApi.reducer,
         [storeInfoApi.reducerPath]:         storeInfoApi.reducer,
         [bizStoreApi.reducerPath]:          bizStoreApi.reducer,
+        [growthApi.reducerPath]:          growthApi.reducer,
  
         [feedbackApi.reducerPath]:          feedbackApi.reducer,
+        [followingApi.reducerPath]:         followingApi.reducer,
         [homeApi.reducerPath]:              homeApi.reducer,
         [userApi.reducerPath]:              userApi.reducer,
     },
@@ -48,6 +50,7 @@ export const store = configureStore({
             .concat(jobsApi.middleware)
             .concat(productApi.middleware)
             .concat(referralApi.middleware)
+            .concat(growthApi.middleware)
             .concat(staffApi.middleware)
             .concat(storeInfoApi.middleware)
             .concat(bizStoreApi.middleware)

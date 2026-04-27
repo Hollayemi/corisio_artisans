@@ -109,7 +109,7 @@ const UserDataProvider = ({ children }: any) => {
         <DataContext.Provider
             value={{
                 ...defaultProvider,
-                userInfo: (!userErr && !userIsLoading && userInfo) || { },
+                userInfo: (!userErr && !userIsLoading && userInfo.data) || { },
                 loading,
                 setLoading: setLoading,
                 showAlert,

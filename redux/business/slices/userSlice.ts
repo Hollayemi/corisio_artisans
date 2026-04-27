@@ -85,7 +85,7 @@ export interface UpdateProfilePayload {
 
 export const userApi = createApi({
     reducerPath: 'userAccountApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['User'],
     endpoints: (builder) => ({
 

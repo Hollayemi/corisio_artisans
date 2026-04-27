@@ -6,17 +6,18 @@ import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { router } from "expo-router";
 import { jwtDecode } from "jwt-decode";
-export type TokenOwner = "store" | "user" | "auto";
+export type TokenOwner = "business" | "user" | "auto" | "none";
 
-const TOKEN_KEYS: Record<"store" | "user", string> = {
-    store: "store_token",
+const TOKEN_KEYS: Record<"business" | "user" | 'none', string> = {
+    business: "business_token",
     user: "user_token",
+    none: "",
 };
 
 export const getToken = async (owner: TokenOwner = "auto"): Promise<string | null> => {
     if (owner === "auto") {
-        const store = await AsyncStorage.getItem(TOKEN_KEYS.store);
-        if (store) return store;
+        const business = await AsyncStorage.getItem(TOKEN_KEYS.business);
+        if (business) return business;
         return AsyncStorage.getItem(TOKEN_KEYS.user);
     }
     return AsyncStorage.getItem(TOKEN_KEYS[owner]);
@@ -25,8 +26,12 @@ export const getToken = async (owner: TokenOwner = "auto"): Promise<string | nul
 export const isAuthenticated = async (owner: TokenOwner = "auto"): Promise<boolean> => {
     try {
         const token = await getToken(owner);
+        console.log("Token for owner", owner, ":", token);
         if (!token) return false;
         const decoded = jwtDecode<{ exp?: number }>(token);
+
+        console.log(decoded)
+
         if (typeof decoded.exp !== "number") return false;
         return decoded.exp > Date.now() / 1000;
     } catch {
@@ -35,10 +40,12 @@ export const isAuthenticated = async (owner: TokenOwner = "auto"): Promise<boole
 };
 
 export const clearAllTokens = async () => {
-    await AsyncStorage.multiRemove([
-        "store_token", "store_refresh_token", "store_data",
-        "user_token",  "user_refresh_token",  "user_data",
-    ]);
+    await AsyncStorage.removeItem("business_token");
+    await AsyncStorage.removeItem("business_refresh_token");
+    await AsyncStorage.removeItem("business_data");
+    await AsyncStorage.removeItem("user_token");
+    await AsyncStorage.removeItem("user_refresh_token");
+    await AsyncStorage.removeItem("user_data");
 };
 
 export type AxiosBaseQueryArgs = {
@@ -59,8 +66,8 @@ interface CustomError {
 export const axiosBaseQuery =
     (defaultTokenOwner: TokenOwner | "none" = "auto"): BaseQueryFn<AxiosBaseQueryArgs, unknown, CustomError> =>
     async ({ url, method, data, params, headers = {}, tokenOwner, skipErrorHandling = false }) => {
+        const owner = (tokenOwner ?? defaultTokenOwner) as TokenOwner | "none";
         try {
-            const owner = (tokenOwner ?? defaultTokenOwner) as TokenOwner | "none";
             let authHeader: Record<string, string> = {};
 
             if (owner !== "none") {
@@ -93,10 +100,14 @@ export const axiosBaseQuery =
                     }
                 }
 
+                const isAuthed = await isAuthenticated(owner);
+
+                console.log(owner, isAuthed)
+
                 // Auth error, clear tokens + go to login
-                if (status === 401 || status === 403) {
+                if (status === 401 || status === 403 || !isAuthed) {
                     await clearAllTokens();
-                    router.replace("/auth/Login");
+                    router.push({pathname:"/auth/Login", params: {party: owner}});
                     return { error: { status, data: errorData } };
                 }
 

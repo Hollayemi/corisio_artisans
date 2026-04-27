@@ -50,7 +50,7 @@ interface ResetPasswordRequest {
 
 export const staffApi = createApi({
     reducerPath: 'staffApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Staff', 'LoggedInStaff'],
     endpoints: (builder) => ({
         // Staff CRUD

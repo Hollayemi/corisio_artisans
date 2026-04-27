@@ -68,7 +68,7 @@ export const LoginScreen = () => {
                         <View className="bg-white dark:bg-gray-800 rounded-t-3xl py-4 shadow-lg">
                             <PhoneNumberInput
                                 nextScreen="/auth/PhoneVerify"
-                                party="user"
+                                party={party || "user"}
                                 type="login" 
                             />
                             <View className="flex-row justify-center pt-4">

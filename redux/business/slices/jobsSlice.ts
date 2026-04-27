@@ -167,7 +167,7 @@ export const MOCK_JOBS: Job[] = [
 
 export const jobsApi = createApi({
     reducerPath: 'jobsApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Jobs', 'MyApplications'],
     endpoints: (builder) => ({
 

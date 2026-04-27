@@ -40,7 +40,7 @@ interface CreateStoreRequest {
 
 export const storeApi = createApi({
     reducerPath: 'userStoreApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Store', 'StoreRole', 'StoreConfig'],
     endpoints: (builder) => ({
         // Store Management

@@ -82,7 +82,7 @@ export default function PhoneVerify() {
         try {
             const res = await verifyOtp({ phoneNumber, otp: code, party: party as AuthParty }).unwrap();
 
-            // ── Decide where to navigate ──────────────────────────────────────
+            // ----- Decide where to navigate ----------------------
             if (party === "business") {
                 const status = res.data?.store?.onboardingStatus;
                 if (type === "login" || status === "verified") {
@@ -115,7 +115,7 @@ export default function PhoneVerify() {
     const handleResend = async () => {
         if (resending || counting) return;
         try {
-            await resendOtp({ phoneNumber, party: party as AuthParty }).unwrap();
+            await resendOtp({ phoneNumber, type: "login", party: party as AuthParty }).unwrap();
             setOtp(Array(OTP_LENGTH).fill(""));
             setCountdown(RESEND_COUNTDOWN);
             setCounting(true);
@@ -134,11 +134,11 @@ export default function PhoneVerify() {
         `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SafeAreaView className="flex-1 bg-white dark:bg-gray-900">
-                <ProgressHeader currentStep={3} />
-                <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                    <View className="pt-6">
+        <TouchableWithoutFeedback style={{ flex: 1 }}  onPress={Keyboard.dismiss}>
+            <SafeAreaView style={{ flex: 1 }}  className="flex-1 bg-white  dark:bg-gray-900">
+                {type !== "login" && <ProgressHeader currentStep={2} />}
+                <ScrollView className="flex-1 " style={{ flex: 1 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                    <View className="pt-6 ">
                         <PageHeader title="Verify Your Number" subtitle={`Enter the 6-digit code sent to ${maskedPhone}`} />
                         <View className="px-6">
                             {/* OTP boxes */}

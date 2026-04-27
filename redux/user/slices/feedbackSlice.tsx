@@ -1,6 +1,6 @@
 // store/api/feedbackApi.js
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from '../api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // Common interfaces
 interface ApiResponse<T> {

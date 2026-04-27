@@ -1,6 +1,6 @@
 import LocationManager from '@/hooks/useCoordinates';
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { axiosBaseQuery } from '../api/axiosBaseQuery';
+import { axiosBaseQuery } from '@/redux/shared/axiosBaseQuery';
 
 // Define types for your API responses
 interface Product {

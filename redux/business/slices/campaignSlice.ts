@@ -85,7 +85,7 @@ interface Notification {
 
 export const campaignsDashboardApi = createApi({
     reducerPath: 'campaignsDashboardApi',
-    baseQuery: axiosBaseQuery("store"),
+    baseQuery: axiosBaseQuery("business"),
     tagTypes: ['Campaign', 'Announcement', 'Dashboard', 'Notification'],
     endpoints: (builder) => ({
         // Campaigns
